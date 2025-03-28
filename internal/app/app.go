@@ -47,7 +47,7 @@ type Storage interface {
 type BucketStorage interface {
 	Init(ctx context.Context, logger storageData.Logger, config storageData.Config) error
 	SetBucketValue(ctx context.Context, logger storageData.Logger, bucketName string, value int) error
-	IncreaseAndGetBucketValue(ctx context.Context, logger storageData.Logger, bucketName string) (int, error)
+	IncreaseAndGetBucketValue(ctx context.Context, logger storageData.Logger, bucketName string) (int64, error)
 	Close(ctx context.Context, logger storageData.Logger) error
 	FlushStorage(ctx context.Context, logger storageData.Logger) error
 }
@@ -99,7 +99,7 @@ func (a *App) CheckRequest(ctx context.Context, req storageData.RequestAuth) (bo
 		a.logger.Error(message)
 		return false, "", err
 	}
-	if countLogin > int(a.limitLogin) {
+	if countLogin > int64(a.limitLogin) {
 		return false, "Limited by login rate", nil
 	}
 	countPassword, err := a.bucketStorage.IncreaseAndGetBucketValue(ctx, a.logger, "p_"+req.Password)
@@ -109,7 +109,7 @@ func (a *App) CheckRequest(ctx context.Context, req storageData.RequestAuth) (bo
 		a.logger.Error(message)
 		return false, "", err
 	}
-	if countPassword > int(a.limitPassword) {
+	if countPassword > int64(a.limitPassword) {
 		return false, "Limited by password rate", nil
 	}
 	countIP, err := a.bucketStorage.IncreaseAndGetBucketValue(ctx, a.logger, "i_"+req.IP)
@@ -119,7 +119,7 @@ func (a *App) CheckRequest(ctx context.Context, req storageData.RequestAuth) (bo
 		a.logger.Error(message)
 		return false, "", err
 	}
-	if countIP > int(a.limitIP) {
+	if countIP > int64(a.limitIP) {
 		return false, "Limited by IP rate", nil
 	}
 	return true, "Check successful", nil
