@@ -3,13 +3,14 @@ package redis_client
 import (
 	"antibf/internal/storage/storageData"
 	"context"
+	redisMock "github.com/alicebob/miniredis/v2"
 	redis "github.com/redis/go-redis/v9"
 	"strconv"
 )
 
 type RedisStorage struct {
-	redisdb *redis.Client
-	//mockServer *redisMock.Miniredis
+	redisdb    *redis.Client
+	mockServer *redisMock.Miniredis
 }
 
 func New() *RedisStorage {
@@ -24,6 +25,26 @@ func (red *RedisStorage) Init(ctx context.Context, logger storageData.Logger, co
 	_, err := red.redisdb.Ping(ctx).Result()
 	if err != nil {
 		logger.Error("RedisDB ping failed: " + err.Error())
+		return err
+	}
+	red.redisdb.FlushDB(ctx)
+	return nil
+}
+func (red *RedisStorage) InitAsMock(ctx context.Context, logger storageData.Logger) error {
+	var err error
+	red.mockServer, err = redisMock.Run()
+	if err != nil {
+		logger.Error("Redis mock failed:" + err.Error())
+		return err
+	}
+	red.redisdb = redis.NewClient(&redis.Options{
+		Addr:     red.mockServer.Addr(),
+		Password: "",
+		DB:       0,
+	})
+	_, err = red.redisdb.Ping(ctx).Result()
+	if err != nil {
+		logger.Error("Redis mock ping failed:" + err.Error())
 		return err
 	}
 	red.redisdb.FlushDB(ctx)
