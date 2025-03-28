@@ -34,7 +34,7 @@ func init() {
 func main() {
 	flag.Parse()
 	if flag.Arg(0) == "version" {
-		printVersion()
+		printCliVersion()
 		return
 	}
 	config := NewConfig()

@@ -12,7 +12,7 @@ var (
 	gitHash   = "NONE"
 )
 
-func printVersion() {
+func printCliVersion() {
 	if err := json.NewEncoder(os.Stdout).Encode(struct {
 		Release   string
 		BuildDate string
