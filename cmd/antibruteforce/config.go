@@ -7,25 +7,25 @@ import (
 )
 
 type Config struct {
-	Logger                LoggerConf    `mapstructure:"Logger"`
-	ServerShutdownTimeout time.Duration `mapstructure:"server_shutdown_timeout"`
-	dbMaxConnLifetime     time.Duration `mapstructure:"db_max_conn_lifetime"`
-	dbTimeOut             time.Duration `mapstructure:"db_timeout"`
-	limitTimeCheck        time.Duration `mapstructure:"limit_timecheck"`
-	address               string        `mapstructure:"address"`
-	port                  string        `mapstructure:"port"`
-	redisAddress          string        `mapstructure:"redis_address"`
-	redisPort             string        `mapstructure:"redis_port"`
-	dbAddress             string        `mapstructure:"db_address"`
-	dbPort                string        `mapstructure:"db_port"`
-	dbName                string        `mapstructure:"POSTGRES_DB"`
-	dbUser                string        `mapstructure:"POSTGRES_USER"`
-	dbPassword            string        `mapstructure:"POSTGRES_PASSWORD"`
-	dbMaxOpenConns        int           `mapstructure:"DB_MAX_OPEN_CONNS"`
-	dbMaxIdleConns        int           `mapstructure:"DB_MAX_IDLE_CONNS"`
-	limitLogin            int           `mapstructure:"limit_login"`
-	limitPassword         int           `mapstructure:"limit_password"`
-	limitIP               int           `mapstructure:"limit_ip"`
+	Logger                  LoggerConf    `mapstructure:"Logger"`
+	ServerShutdownTimeout   time.Duration `mapstructure:"server_shutdown_timeout"`
+	dbMaxConnectionLifetime time.Duration `mapstructure:"db_max_conn_lifetime"`
+	dbTimeout               time.Duration `mapstructure:"db_timeout"`
+	limitTimeCheck          time.Duration `mapstructure:"limit_timecheck"`
+	address                 string        `mapstructure:"address"`
+	port                    string        `mapstructure:"port"`
+	redisAddress            string        `mapstructure:"redis_address"`
+	redisPort               string        `mapstructure:"redis_port"`
+	dbAddress               string        `mapstructure:"db_address"`
+	dbPort                  string        `mapstructure:"db_port"`
+	dbName                  string        `mapstructure:"POSTGRES_DB"`
+	dbUser                  string        `mapstructure:"POSTGRES_USER"`
+	dbPassword              string        `mapstructure:"POSTGRES_PASSWORD"`
+	dbMaxOpenConnections    int           `mapstructure:"DB_MAX_OPEN_CONNS"`
+	dbMaxIdleConnections    int           `mapstructure:"DB_MAX_IDLE_CONNS"`
+	limitLogin              int           `mapstructure:"limit_login"`
+	limitPassword           int           `mapstructure:"limit_password"`
+	limitIP                 int           `mapstructure:"limit_ip"`
 }
 type LoggerConf struct {
 	Level string `mapstructure:"log_level"`
@@ -74,10 +74,10 @@ func (config *Config) Init(path string) error {
 	config.dbName = viper.GetString("POSTGRES_DB")
 	config.dbUser = viper.GetString("POSTGRES_USER")
 	config.dbPassword = viper.GetString("POSTGRES_PASSWORD")
-	config.dbMaxOpenConns = viper.GetInt("DB_MAX_OPEN_CONNS")
-	config.dbMaxIdleConns = viper.GetInt("DB_MAX_IDLE_CONNS")
-	config.dbMaxConnLifetime = viper.GetDuration("db_max_conn_lifetime")
-	config.dbTimeOut = viper.GetDuration("db_timeout")
+	config.dbMaxOpenConnections = viper.GetInt("DB_MAX_OPEN_CONNS")
+	config.dbMaxIdleConnections = viper.GetInt("DB_MAX_IDLE_CONNS")
+	config.dbMaxConnectionLifetime = viper.GetDuration("db_max_conn_lifetime")
+	config.dbTimeout = viper.GetDuration("db_timeout")
 	config.Logger.Level = viper.GetString("LOG_LEVEL")
 	config.dbAddress = viper.GetString("DB_ADDRESS")
 	config.dbPort = viper.GetString("DB_PORT")
@@ -111,17 +111,17 @@ func (config *Config) GetDBUser() string {
 func (config *Config) GetDBPassword() string {
 	return config.dbPassword
 }
-func (config *Config) GetDBMaxOpenConns() int {
-	return config.dbMaxOpenConns
+func (config *Config) GetDBMaxOpenConnections() int {
+	return config.dbMaxOpenConnections
 }
-func (config *Config) GetDBMaxIdleConns() int {
-	return config.dbMaxIdleConns
+func (config *Config) GetDBMaxIdleConnections() int {
+	return config.dbMaxIdleConnections
 }
-func (config *Config) GetDBMaxConnLifetime() time.Duration {
-	return config.dbMaxConnLifetime
+func (config *Config) GetDBMaxConnectionLifetime() time.Duration {
+	return config.dbMaxConnectionLifetime
 }
-func (config *Config) GetDBTimeOut() time.Duration {
-	return config.dbTimeOut
+func (config *Config) GetDBTimeout() time.Duration {
+	return config.dbTimeout
 }
 func (config *Config) GetDBAddress() string {
 	return config.dbAddress

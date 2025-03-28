@@ -4,6 +4,8 @@ import (
 	"antibf/internal/app"
 	"antibf/internal/logger"
 	http_internal "antibf/internal/server/http"
+	RedisStorage "antibf/internal/storage/redis"
+	SQLstorage "antibf/internal/storage/sqldb"
 	"context"
 	"flag"
 	"fmt"
@@ -36,7 +38,7 @@ func main() {
 	}
 	log.Info("Server Address: " + config.GetAddress())
 	var storage app.Storage
-	ctxStorage, cancelStorage := context.WithTimeout(context.Background(), config.GetDBTimeOut())
+	ctxStorage, cancelStorage := context.WithTimeout(context.Background(), config.GetDBTimeout())
 	storage = SQLstorage.New()
 	err = storage.Init(ctxStorage, log, &config)
 	if err != nil {
