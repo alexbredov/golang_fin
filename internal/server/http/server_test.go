@@ -297,6 +297,60 @@ func TestServer_RESTBlackList(t *testing.T) {
 		require.Equal(t, respExpect, string(respBody))
 	})
 }
+func TestServer_AuthorizationRequest(t *testing.T) {
+	t.Run("AuthorizationRequest", func(t *testing.T) {
+		data := bytes.NewBufferString(`{
+			"Login":"user",
+			"Password":"PassGood",
+			"IP":"192.168.64.12"
+		}`)
+		server := createServer(t)
+		r := httptest.NewRequest("GET", "/request/", data)
+		w := httptest.NewRecorder()
+		server.AuthorizationRequest(w, r)
+		result := w.Result()
+		defer result.Body.Close()
+		respBody, err := io.ReadAll(result.Body)
+		require.NoError(t, err)
+		respExpect := `{"Message":"Check successful","OK":true}`
+		require.Equal(t, respExpect, string(respBody))
+	})
+}
+func TestServer_ClearBucketForLogin(t *testing.T) {
+	t.Run("ClearBucketForLogin", func(t *testing.T) {
+		data := bytes.NewBufferString(`{
+			"Tag":"user"
+		}`)
+		server := createServer(t)
+		r := httptest.NewRequest("DELETE", "/clearbucketforlogin/", data)
+		w := httptest.NewRecorder()
+		server.ClearBucketForLogin(w, r)
+		result := w.Result()
+		defer result.Body.Close()
+		respBody, err := io.ReadAll(result.Body)
+		require.NoError(t, err)
+		respExpect := correctOutJSONAnswer
+		require.Equal(t, respExpect, string(respBody))
+	})
+}
+
+func TestServer_ClearBucketForIP(t *testing.T) {
+	t.Run("ClearBucketForIP", func(t *testing.T) {
+		data := bytes.NewBufferString(`{
+			"Tag":"192.168.64.12"
+		}`)
+		server := createServer(t)
+		r := httptest.NewRequest("DELETE", "/clearbucketforip/", data)
+		w := httptest.NewRecorder()
+		server.ClearBucketForIP(w, r)
+		result := w.Result()
+		defer result.Body.Close()
+		respBody, err := io.ReadAll(result.Body)
+		require.NoError(t, err)
+		respExpect := correctOutJSONAnswer
+		require.Equal(t, respExpect, string(respBody))
+	})
+}
 
 func createServer(t *testing.T) *Server {
 	t.Helper()
