@@ -19,7 +19,15 @@ type StorageSQLMock struct {
 func New() *StorageSQLMock {
 	return &StorageSQLMock{}
 }
-
+func (mock *StorageSQLMock) Init(_ context.Context, _ storageData.Logger, _ storageData.Config) error {
+	mock.mu.Lock()
+	defer mock.mu.Unlock()
+	mock.whitelist = make(map[string]storageData.StorageIPData)
+	mock.blacklist = make(map[string]storageData.StorageIPData)
+	mock.idWhite = 0
+	mock.idBlack = 0
+	return nil
+}
 func (mock *StorageSQLMock) Close(_ context.Context, _ storageData.Logger) error {
 	return nil
 }

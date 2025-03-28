@@ -46,8 +46,8 @@ type Storage interface {
 }
 type BucketStorage interface {
 	Init(ctx context.Context, logger storageData.Logger, config storageData.Config) error
-	SetBucketValue(ctx context.Context, logger storageData.Logger, key string, value int) error
-	IncreaseAndGetBucketValue(ctx context.Context, logger storageData.Logger, key string) (int, error)
+	SetBucketValue(ctx context.Context, logger storageData.Logger, bucketName string, value int) error
+	IncreaseAndGetBucketValue(ctx context.Context, logger storageData.Logger, bucketName string) (int, error)
 	Close(ctx context.Context, logger storageData.Logger) error
 	FlushStorage(ctx context.Context, logger storageData.Logger) error
 }
