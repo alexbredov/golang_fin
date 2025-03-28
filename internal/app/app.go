@@ -74,18 +74,18 @@ func (a *App) CloseBucketStorage(ctx context.Context) error {
 }
 
 func (a *App) CheckRequest(ctx context.Context, req storageData.RequestAuth) (bool, string, error) {
-	ok, err := a.IPIsInList(ctx, "blacklist", req.IP)
+	ok, err := a.IPIsInSubnetCheck(ctx, "blacklist", req.IP)
 	if err != nil {
-		message := helpers.StringBuild("CheckRequest IPIsInList error: ", err.Error())
+		message := helpers.StringBuild("CheckRequest IPIsInSubnet error: ", err.Error())
 		a.logger.Error(message)
 		return false, "", err
 	}
 	if ok {
 		return false, "IP is in blacklist", nil
 	}
-	ok, err = a.IPIsInList(ctx, "whitelist", req.IP)
+	ok, err = a.IPIsInSubnetCheck(ctx, "whitelist", req.IP)
 	if err != nil {
-		message := helpers.StringBuild("CheckRequest IPIsInList error: ", err.Error())
+		message := helpers.StringBuild("CheckRequest IPIsInSubnet error: ", err.Error())
 		a.logger.Error(message)
 		return false, "", err
 	}
