@@ -92,7 +92,7 @@ func TestServer_RESTWhiteList(t *testing.T) {
 			"Mask":8
 		}`)
 		server := createServer(t)
-		r := httptest.NewRequest("POST", "/whitelist", data)
+		r := httptest.NewRequest("POST", "/whitelist/", data)
 		w := httptest.NewRecorder()
 		server.RESTWhiteList(w, r)
 		result := w.Result()
@@ -181,6 +181,113 @@ func TestServer_RESTWhiteList(t *testing.T) {
 		r := httptest.NewRequest("GET", "/whitelist/", data)
 		w := httptest.NewRecorder()
 		server.RESTWhiteList(w, r)
+		result := w.Result()
+		defer result.Body.Close()
+		respBody, err := io.ReadAll(result.Body)
+		require.NoError(t, err)
+		respExpect := `{"IPList":[{"IP":"192.168.64.12","Mask":8,"ID":0},` +
+			`{"IP":"192.168.0.5","Mask":24,"ID":1}],"Message":{"Text":"Everything is OK","Code":0}}`
+		require.Equal(t, respExpect, string(respBody))
+	})
+}
+func TestServer_RESTBlackList(t *testing.T) {
+	t.Parallel()
+	t.Run("IPAddToBL", func(t *testing.T) {
+		t.Parallel()
+		data := bytes.NewBufferString(`{
+			"IP": "192.168.64.0",
+			"Mask":8
+		}`)
+		server := createServer(t)
+		r := httptest.NewRequest("POST", "/blacklist/", data)
+		w := httptest.NewRecorder()
+		server.RESTBlackList(w, r)
+		result := w.Result()
+		defer result.Body.Close()
+		respBody, err := io.ReadAll(result.Body)
+		require.NoError(t, err)
+		respExpect := correctOutJSONAnswer
+		require.Equal(t, respExpect, string(respBody))
+	})
+	t.Run("IPRemoveFromBL", func(t *testing.T) {
+		t.Parallel()
+		ctrldataTestIP := "192.168.64.0"
+		newData := storageData.StorageIPData{
+			IP:   ctrldataTestIP,
+			Mask: 8,
+		}
+		data := bytes.NewBufferString(`{
+			"IP": "192.168.64.0",
+			"Mask":8
+		}`)
+		server := createServer(t)
+		_, err := server.app.IPAddToList(context.Background(), "blacklist", newData)
+		require.NoError(t, err)
+		ctrldataSlice, err := server.app.IPGetAllFromList(context.Background(), "blacklist")
+		require.NoError(t, err)
+		flag := false
+		for _, currentctrldata := range ctrldataSlice {
+			if currentctrldata.IP == ctrldataTestIP && currentctrldata.Mask == 8 {
+				flag = true
+				break
+			}
+		}
+		require.Equal(t, flag, true)
+		r := httptest.NewRequest("DELETE", "/blacklist/", data)
+		w := httptest.NewRecorder()
+		server.RESTBlackList(w, r)
+		result := w.Result()
+		defer result.Body.Close()
+		respBody, err := io.ReadAll(result.Body)
+		require.NoError(t, err)
+		respExpect := correctOutJSONAnswer
+		require.Equal(t, respExpect, string(respBody))
+	})
+	t.Run("IPIsInBlackList", func(t *testing.T) {
+		t.Parallel()
+		newData := storageData.StorageIPData{
+			IP:   "192.168.64.12",
+			Mask: 8,
+		}
+		data := bytes.NewBufferString(`{
+			"IP":"192.168.64.12",
+			"Mask":8
+		}`)
+		server := createServer(t)
+		_, err := server.app.IPAddToList(context.Background(), "blacklist", newData)
+		require.NoError(t, err)
+		r := httptest.NewRequest("GET", "/blacklist/", data)
+		w := httptest.NewRecorder()
+		server.RESTBlackList(w, r)
+		result := w.Result()
+		defer result.Body.Close()
+		respBody, err := io.ReadAll(result.Body)
+		require.NoError(t, err)
+		respExpect := `{"IPList":[],"Message":{"Text":"Yes","Code":0}}`
+		require.Equal(t, respExpect, string(respBody))
+	})
+	t.Run("IPGetAllFromBL", func(t *testing.T) {
+		t.Parallel()
+		data := bytes.NewBufferString(`{
+			"IP":"ALL",
+			"Mask":0
+		}`)
+		newData := storageData.StorageIPData{
+			IP:   "192.168.64.12",
+			Mask: 8,
+		}
+		server := createServer(t)
+		_, err := server.app.IPAddToList(context.Background(), "blacklist", newData)
+		require.NoError(t, err)
+		newData = storageData.StorageIPData{
+			IP:   "192.168.0.5",
+			Mask: 24,
+		}
+		_, err = server.app.IPAddToList(context.Background(), "blacklist", newData)
+		require.NoError(t, err)
+		r := httptest.NewRequest("GET", "/blacklist/", data)
+		w := httptest.NewRecorder()
+		server.RESTBlackList(w, r)
 		result := w.Result()
 		defer result.Body.Close()
 		respBody, err := io.ReadAll(result.Body)
