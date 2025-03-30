@@ -25,18 +25,23 @@ func New(level string) (*LogWrapper, error) {
 	logWrapper.logger = zap.Must(logWrapper.config.Build()).Sugar()
 	return &logWrapper, nil
 }
+
 func (log LogWrapper) GetZapLogger() *zap.SugaredLogger {
 	return log.logger
 }
+
 func (log LogWrapper) Info(msg string) {
 	log.logger.Info(msg)
 }
+
 func (log LogWrapper) Warning(msg string) {
 	log.logger.Warn(msg)
 }
+
 func (log LogWrapper) Error(msg string) {
 	log.logger.Error(msg)
 }
+
 func (log LogWrapper) Fatal(msg string) {
 	log.logger.Fatal(msg)
 }

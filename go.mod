@@ -1,4 +1,4 @@
-module antibf
+module github.com/abredov/golang_fin
 
 go 1.23.0
 

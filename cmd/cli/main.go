@@ -1,8 +1,6 @@
 package main
 
 import (
-	helpers "antibf/helpers"
-	loggercli "antibf/internal/logger-cli"
 	"bufio"
 	"context"
 	"errors"
@@ -14,6 +12,9 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	helpers "github.com/abredov/golang_fin/helpers"
+	loggercli "github.com/abredov/golang_fin/internal/logger-cli"
 )
 
 var ErrAntiBFNotAvailable = errors.New("antibf is not available")
@@ -31,6 +32,7 @@ var configPath string
 func init() {
 	flag.StringVar(&configPath, "config", "./configs/", "Path to config file")
 }
+
 func main() {
 	flag.Parse()
 	if flag.Arg(0) == "version" {
@@ -84,6 +86,7 @@ func main() {
 		}
 	}
 }
+
 func pingAntiBF(address string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

@@ -1,11 +1,12 @@
 package storagesqlmock
 
 import (
-	storageData "antibf/internal/storage/storageData"
 	"context"
 	"sort"
 	"strconv"
 	"sync"
+
+	storageData "github.com/abredov/golang_fin/internal/storage/storageData"
 )
 
 type StorageSQLMock struct {
@@ -19,6 +20,7 @@ type StorageSQLMock struct {
 func New() *StorageSQLMock {
 	return &StorageSQLMock{}
 }
+
 func (mock *StorageSQLMock) Init(_ context.Context, _ storageData.Logger, _ storageData.Config) error {
 	mock.mu.Lock()
 	defer mock.mu.Unlock()
@@ -28,6 +30,7 @@ func (mock *StorageSQLMock) Init(_ context.Context, _ storageData.Logger, _ stor
 	mock.idBlack = 0
 	return nil
 }
+
 func (mock *StorageSQLMock) Close(_ context.Context, _ storageData.Logger) error {
 	return nil
 }
@@ -55,6 +58,7 @@ func (mock *StorageSQLMock) IPAddToList(ctx context.Context, listname string, _ 
 		return ipData.ID, nil
 	}
 }
+
 func (mock *StorageSQLMock) IPIsInList(ctx context.Context, listname string, _ storageData.Logger, ipData storageData.StorageIPData) (bool, error) { //nolint:lll
 	select {
 	case <-ctx.Done():
@@ -76,6 +80,7 @@ func (mock *StorageSQLMock) IPIsInList(ctx context.Context, listname string, _ s
 		return ok, err
 	}
 }
+
 func (mock *StorageSQLMock) IPRemoveFromList(ctx context.Context, listname string, _ storageData.Logger, ipData storageData.StorageIPData) error { //nolint:lll
 	select {
 	case <-ctx.Done():
@@ -107,6 +112,7 @@ func (mock *StorageSQLMock) IPRemoveFromList(ctx context.Context, listname strin
 		return nil
 	}
 }
+
 func (mock *StorageSQLMock) IPGetAllFromList(ctx context.Context, listname string, _ storageData.Logger) ([]storageData.StorageIPData, error) { //nolint:lll
 	resultIPData := make([]storageData.StorageIPData, 0)
 	select {

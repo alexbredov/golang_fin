@@ -3,16 +3,17 @@
 package app
 
 import (
-	logger "antibf/internal/logger"
-	redisclient "antibf/internal/storage/redis"
-	storageData "antibf/internal/storage/storageData"
-	storageSQLMock "antibf/internal/storage/storageSQLMock"
 	"context"
 	"errors"
-	"github.com/stretchr/testify/require"
 	"strconv"
 	"testing"
 	"time"
+
+	logger "github.com/abredov/golang_fin/internal/logger"
+	redisclient "github.com/abredov/golang_fin/internal/storage/redis"
+	storageData "github.com/abredov/golang_fin/internal/storage/storageData"
+	storageSQLMock "github.com/abredov/golang_fin/internal/storage/storageSQLMock"
+	"github.com/stretchr/testify/require"
 )
 
 const localhost string = "127.0.0.1"
@@ -22,63 +23,83 @@ type ConfigTest struct{}
 func (config *ConfigTest) Init(_ string) error {
 	return nil
 }
+
 func (config *ConfigTest) GetServerURL() string {
 	return "127.0.0.1:4000"
 }
+
 func (config *ConfigTest) GetAddress() string {
 	return localhost
 }
+
 func (config *ConfigTest) GetPort() string {
 	return "4000"
 }
+
 func (config *ConfigTest) GetServerShutdownTimeout() time.Duration {
 	return 5 * time.Second
 }
+
 func (config *ConfigTest) GetDBName() string {
 	return "OTUSAntibf"
 }
+
 func (config *ConfigTest) GetDBUser() string {
 	return "postgres"
 }
+
 func (config *ConfigTest) GetDBPassword() string {
 	return "SecurePass"
 }
+
 func (config *ConfigTest) GetDBMaxConnectionLifetime() time.Duration {
 	return 5 * time.Second
 }
+
 func (config *ConfigTest) GetDBMaxIdleConnections() int {
 	return 20
 }
+
 func (config *ConfigTest) GetDBMaxOpenConnections() int {
 	return 20
 }
+
 func (config *ConfigTest) GetDBTimeout() time.Duration {
 	return 5 * time.Second
 }
+
 func (config *ConfigTest) GetDBAddress() string {
 	return localhost
 }
+
 func (config *ConfigTest) GetDBPort() string {
 	return "5432"
 }
+
 func (config *ConfigTest) GetRedisAddress() string {
 	return localhost
 }
+
 func (config *ConfigTest) GetRedisPort() string {
 	return "6379"
 }
+
 func (config *ConfigTest) GetLimitLogin() int {
 	return 10
 }
+
 func (config *ConfigTest) GetLimitPassword() int {
 	return 100
 }
+
 func (config *ConfigTest) GetLimitIP() int {
 	return 20
 }
+
 func (config *ConfigTest) GetLimitTimeCheck() time.Duration {
 	return 1 * time.Minute
 }
+
 func initAppWMock(t *testing.T) *App {
 	t.Helper()
 	logg, _ := logger.New("debug")
@@ -94,6 +115,7 @@ func initAppWMock(t *testing.T) *App {
 	antibf := New(logg, storage, redis, &config)
 	return antibf
 }
+
 func TestSimpleRequestValidator(t *testing.T) {
 	t.Parallel()
 	t.Run("PositiveRequestValidator", func(t *testing.T) {

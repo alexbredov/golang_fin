@@ -1,11 +1,12 @@
 package redisclient
 
 import (
-	storageData "antibf/internal/storage/storageData"
 	"context"
+	"strconv"
+
+	storageData "github.com/abredov/golang_fin/internal/storage/storageData"
 	redisMock "github.com/alicebob/miniredis/v2"
 	redis "github.com/redis/go-redis/v9"
-	"strconv"
 )
 
 type RedisStorage struct {
@@ -16,6 +17,7 @@ type RedisStorage struct {
 func New() *RedisStorage {
 	return &RedisStorage{}
 }
+
 func (red *RedisStorage) Init(ctx context.Context, logger storageData.Logger, config storageData.Config) error {
 	red.redisdb = redis.NewClient(&redis.Options{
 		Addr:     config.GetRedisAddress() + ":" + config.GetRedisPort(),
@@ -30,6 +32,7 @@ func (red *RedisStorage) Init(ctx context.Context, logger storageData.Logger, co
 	red.redisdb.FlushDB(ctx)
 	return nil
 }
+
 func (red *RedisStorage) InitAsMock(ctx context.Context, logger storageData.Logger) error {
 	var err error
 	red.mockServer, err = redisMock.Run()
@@ -50,6 +53,7 @@ func (red *RedisStorage) InitAsMock(ctx context.Context, logger storageData.Logg
 	red.redisdb.FlushDB(ctx)
 	return nil
 }
+
 func (red *RedisStorage) Close(ctx context.Context, logger storageData.Logger) error {
 	err := red.FlushStorage(ctx, logger)
 	if err != nil {
@@ -63,6 +67,7 @@ func (red *RedisStorage) Close(ctx context.Context, logger storageData.Logger) e
 	}
 	return nil
 }
+
 func (red *RedisStorage) IncreaseAndGetBucketValue(ctx context.Context, logger storageData.Logger, bucketName string) (int64, error) { //nolint:lll
 	result, err := red.redisdb.Incr(ctx, bucketName).Result()
 	if err != nil {
@@ -71,6 +76,7 @@ func (red *RedisStorage) IncreaseAndGetBucketValue(ctx context.Context, logger s
 	}
 	return result, nil
 }
+
 func (red *RedisStorage) SetBucketValue(ctx context.Context, logger storageData.Logger, bucketName string, value int) error { //nolint:lll
 	strValue := strconv.Itoa(value)
 	err := red.redisdb.Set(ctx, bucketName, strValue, 0).Err()
@@ -80,6 +86,7 @@ func (red *RedisStorage) SetBucketValue(ctx context.Context, logger storageData.
 	}
 	return nil
 }
+
 func (red *RedisStorage) FlushStorage(ctx context.Context, _ storageData.Logger) error {
 	red.redisdb.FlushDB(ctx)
 	return nil

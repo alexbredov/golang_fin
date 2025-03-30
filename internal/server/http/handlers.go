@@ -1,14 +1,15 @@
 package httpinternal
 
 import (
-	"antibf/helpers"
-	storageData "antibf/internal/storage/storageData"
 	"context"
 	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/abredov/golang_fin/helpers"
+	storageData "github.com/abredov/golang_fin/internal/storage/storageData"
 )
 
 const correctAnswerText string = "Everything is OK"
@@ -54,9 +55,11 @@ func apiErrHandler(err error, w *http.ResponseWriter) {
 		http.Error(W, errMsg, http.StatusInternalServerError)
 	}
 }
+
 func (server *Server) helloWorld(w http.ResponseWriter, _ *http.Request) {
 	w.Write([]byte("Hello World"))
 }
+
 func (server *Server) AuthorizationRequest(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*10)
@@ -99,12 +102,15 @@ func (server *Server) AuthorizationRequest(w http.ResponseWriter, r *http.Reques
 		return
 	}
 }
+
 func (server *Server) ClearBucketForIP(w http.ResponseWriter, r *http.Request) {
 	server.clearBucketByTag(w, r, "ip")
 }
+
 func (server *Server) ClearBucketForLogin(w http.ResponseWriter, r *http.Request) {
 	server.clearBucketByTag(w, r, "login")
 }
+
 func (server *Server) clearBucketByTag(w http.ResponseWriter, r *http.Request, tagType string) {
 	defer r.Body.Close()
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*10)
@@ -160,9 +166,11 @@ func (server *Server) clearBucketByTag(w http.ResponseWriter, r *http.Request, t
 func (server *Server) RESTWhiteList(w http.ResponseWriter, r *http.Request) {
 	server.listRest(w, r, "whitelist")
 }
+
 func (server *Server) RESTBlackList(w http.ResponseWriter, r *http.Request) {
 	server.listRest(w, r, "blacklist")
 }
+
 func (server *Server) listRest(w http.ResponseWriter, r *http.Request, listname string) {
 	defer r.Body.Close()
 	ctx, cancel := context.WithTimeout(r.Context(), server.Config.GetDBTimeout())

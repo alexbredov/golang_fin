@@ -1,9 +1,6 @@
 package main
 
 import (
-	helpers "antibf/helpers"
-	loggercli "antibf/internal/logger-cli"
-	storageData "antibf/internal/storage/storageData"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -13,6 +10,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	helpers "github.com/abredov/golang_fin/helpers"
+	loggercli "github.com/abredov/golang_fin/internal/logger-cli"
+	storageData "github.com/abredov/golang_fin/internal/storage/storageData"
 )
 
 const correctAnswerText string = "Everything is OK"
@@ -43,10 +44,12 @@ var (
 func NewCommandController() *CommandController {
 	return &CommandController{}
 }
+
 func (comcont *CommandController) Init(address string, logger *loggercli.LogWrapper) {
 	comcont.address = address
 	comcont.logger = logger
 }
+
 func (comcont *CommandController) processCommand(rawCommand string) string {
 	comcont.logger.Info("Command: " + rawCommand)
 	commandData := strings.Split(rawCommand, " ")
@@ -84,12 +87,14 @@ func (comcont *CommandController) processCommand(rawCommand string) string {
 	comcont.logger.Info(msg)
 	return msg
 }
+
 func (comcont *CommandController) help() string {
 	return `
 help - show this message
 long: WhitelistAdd [subnet], short: wladd [subnet] - add subnet to whitelist
 long: Remove`
 }
+
 func (comcont *CommandController) addToList(arg []string, listname string) string { //nolint:dupl
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -143,6 +148,7 @@ func (comcont *CommandController) addToList(arg []string, listname string) strin
 	comcont.logger.Info(msg)
 	return msg
 }
+
 func (comcont *CommandController) removeFromList(arg []string, listname string) string { //nolint:dupl
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -196,6 +202,7 @@ func (comcont *CommandController) removeFromList(arg []string, listname string) 
 	comcont.logger.Info(msg)
 	return msg
 }
+
 func (comcont *CommandController) isInList(arg []string, listname string) string {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -248,6 +255,7 @@ func (comcont *CommandController) isInList(arg []string, listname string) string
 	msg := "Subnet found in " + listname + ":" + answer.Message.Text + "."
 	return msg
 }
+
 func (comcont *CommandController) allInList(listname string) string {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -294,6 +302,7 @@ func (comcont *CommandController) allInList(listname string) string {
 	comcont.logger.Info(msg)
 	return msg
 }
+
 func (comcont *CommandController) request(arg []string) string {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -345,6 +354,7 @@ func (comcont *CommandController) request(arg []string) string {
 	comcont.logger.Info(msg)
 	return msg
 }
+
 func (comcont *CommandController) clearBucketByTag(arg []string, typeClear string) string {
 	var urlByType string
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

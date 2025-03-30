@@ -1,12 +1,13 @@
 package httpinternal
 
 import (
-	storageData "antibf/internal/storage/storageData"
 	"context"
 	"errors"
-	"go.uber.org/zap"
 	"net/http"
 	"time"
+
+	storageData "github.com/abredov/golang_fin/internal/storage/storageData"
+	"go.uber.org/zap"
 )
 
 var ErrBadBucketTypeTag = errors.New("bad bucket type tag")
@@ -73,6 +74,7 @@ func NewServer(logger Logger, app Application, config Config) *Server {
 	}
 	return &server
 }
+
 func (server *Server) Start(ctx context.Context) error {
 	server.logger.Info("AntiBF is running")
 	server.app.RateLimitTicker(ctx)
@@ -86,6 +88,7 @@ func (server *Server) Start(ctx context.Context) error {
 	<-ctx.Done()
 	return err
 }
+
 func (server *Server) Shutdown(ctx context.Context) error {
 	err := server.server.Shutdown(ctx)
 	if err != nil {

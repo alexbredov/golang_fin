@@ -3,13 +3,13 @@
 package integrationtests
 
 import (
-	"antibf/helpers"
-	"antibf/internal/logger"
-	storageData "antibf/internal/storage/storageData"
 	"context"
 	"database/sql"
 	"flag"
 	"fmt"
+	"github.com/abredov/golang_fin/helpers"
+	"github.com/abredov/golang_fin/internal/logger"
+	storageData "github.com/abredov/golang_fin/internal/storage/storageData"
 	"github.com/redis/go-redis/v9"
 	"os"
 	"os/signal"

@@ -1,17 +1,18 @@
 package main
 
 import (
-	"antibf/internal/app"
-	"antibf/internal/logger"
-	httpinternal "antibf/internal/server/http"
-	RedisStorage "antibf/internal/storage/redis"
-	SQLstorage "antibf/internal/storage/sqldb"
 	"context"
 	"flag"
 	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/abredov/golang_fin/internal/app"
+	"github.com/abredov/golang_fin/internal/logger"
+	httpinternal "github.com/abredov/golang_fin/internal/server/http"
+	RedisStorage "github.com/abredov/golang_fin/internal/storage/redis"
+	SQLstorage "github.com/abredov/golang_fin/internal/storage/sqldb"
 )
 
 var configFilePath string
@@ -19,6 +20,7 @@ var configFilePath string
 func init() {
 	flag.StringVar(&configFilePath, "config", "./configs/", "Path to config")
 }
+
 func main() {
 	flag.Parse()
 	if flag.Arg(0) == "version" {

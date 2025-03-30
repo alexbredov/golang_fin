@@ -3,82 +3,104 @@
 package httpinternal
 
 import (
-	"antibf/internal/app"
-	logger "antibf/internal/logger"
-	RedisStorage "antibf/internal/storage/redis"
-	storageData "antibf/internal/storage/storageData"
-	storageSQLMock "antibf/internal/storage/storageSQLMock"
 	"bytes"
 	"context"
-	"github.com/stretchr/testify/require"
 	"io"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/abredov/golang_fin/internal/app"
+	logger "github.com/abredov/golang_fin/internal/logger"
+	RedisStorage "github.com/abredov/golang_fin/internal/storage/redis"
+	storageData "github.com/abredov/golang_fin/internal/storage/storageData"
+	storageSQLMock "github.com/abredov/golang_fin/internal/storage/storageSQLMock"
+	"github.com/stretchr/testify/require"
 )
 
-const correctOutJSONAnswer string = `{"Text":"Everything is OK","Code":0}`
-const localhost string = "127.0.0.1"
+const (
+	correctOutJSONAnswer string = `{"Text":"Everything is OK","Code":0}`
+	localhost            string = "127.0.0.1"
+)
 
 type ConfigTest struct{}
 
 func (config *ConfigTest) Init(_ string) error {
 	return nil
 }
+
 func (config *ConfigTest) GetServerURL() string {
 	return "127.0.0.1:4000"
 }
+
 func (config *ConfigTest) GetAddress() string {
 	return localhost
 }
+
 func (config *ConfigTest) GetPort() string {
 	return "4000"
 }
+
 func (config *ConfigTest) GetServerShutdownTimeout() time.Duration {
 	return 5 * time.Second
 }
+
 func (config *ConfigTest) GetDBName() string {
 	return "OTUSAntibf"
 }
+
 func (config *ConfigTest) GetDBUser() string {
 	return "postgres"
 }
+
 func (config *ConfigTest) GetDBPassword() string {
 	return "SecurePass"
 }
+
 func (config *ConfigTest) GetDBMaxConnectionLifetime() time.Duration {
 	return 5 * time.Second
 }
+
 func (config *ConfigTest) GetDBMaxIdleConnections() int {
 	return 20
 }
+
 func (config *ConfigTest) GetDBMaxOpenConnections() int {
 	return 20
 }
+
 func (config *ConfigTest) GetDBTimeout() time.Duration {
 	return 5 * time.Second
 }
+
 func (config *ConfigTest) GetDBAddress() string {
 	return localhost
 }
+
 func (config *ConfigTest) GetDBPort() string {
 	return "5432"
 }
+
 func (config *ConfigTest) GetRedisAddress() string {
 	return localhost
 }
+
 func (config *ConfigTest) GetRedisPort() string {
 	return "6379"
 }
+
 func (config *ConfigTest) GetLimitLogin() int {
 	return 10
 }
+
 func (config *ConfigTest) GetLimitPassword() int {
 	return 100
 }
+
 func (config *ConfigTest) GetLimitIP() int {
 	return 1000
 }
+
 func (config *ConfigTest) GetLimitTimeCheck() time.Duration {
 	return 1 * time.Minute
 }
@@ -190,6 +212,7 @@ func TestServer_RESTWhiteList(t *testing.T) { //nolint:dupl
 		require.Equal(t, respExpect, string(respBody))
 	})
 }
+
 func TestServer_RESTBlackList(t *testing.T) { //nolint:dupl
 	t.Parallel()
 	t.Run("IPAddToBL", func(t *testing.T) {
@@ -297,6 +320,7 @@ func TestServer_RESTBlackList(t *testing.T) { //nolint:dupl
 		require.Equal(t, respExpect, string(respBody))
 	})
 }
+
 func TestServer_AuthorizationRequest(t *testing.T) {
 	t.Run("AuthorizationRequest", func(t *testing.T) {
 		data := bytes.NewBufferString(`{
@@ -316,6 +340,7 @@ func TestServer_AuthorizationRequest(t *testing.T) {
 		require.Equal(t, respExpect, string(respBody))
 	})
 }
+
 func TestServer_ClearBucketForLogin(t *testing.T) {
 	t.Run("ClearBucketForLogin", func(t *testing.T) {
 		data := bytes.NewBufferString(`{

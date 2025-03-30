@@ -1,11 +1,12 @@
 package sqldb
 
 import (
-	"antibf/helpers"
-	storageData "antibf/internal/storage/storageData"
 	"context"
 	"database/sql"
 	"errors"
+
+	"github.com/abredov/golang_fin/helpers"
+	storageData "github.com/abredov/golang_fin/internal/storage/storageData"
 )
 
 type Storage struct {
@@ -15,6 +16,7 @@ type Storage struct {
 func New() *Storage {
 	return &Storage{}
 }
+
 func (storage *Storage) Init(ctx context.Context, logger storageData.Logger, config storageData.Config) error {
 	err := storage.Connect(ctx, logger, config)
 	if err != nil {
@@ -28,6 +30,7 @@ func (storage *Storage) Init(ctx context.Context, logger storageData.Logger, con
 	}
 	return err
 }
+
 func (storage *Storage) Connect(ctx context.Context, logger storageData.Logger, config storageData.Config) error {
 	select {
 	case <-ctx.Done():
@@ -47,6 +50,7 @@ func (storage *Storage) Connect(ctx context.Context, logger storageData.Logger, 
 		return nil
 	}
 }
+
 func (storage *Storage) Close(ctx context.Context, logger storageData.Logger) error {
 	select {
 	case <-ctx.Done():
@@ -60,6 +64,7 @@ func (storage *Storage) Close(ctx context.Context, logger storageData.Logger) er
 	}
 	return nil
 }
+
 func (storage *Storage) IPAddToList(ctx context.Context, listname string, logger storageData.Logger, ipData storageData.StorageIPData) (int, error) { //nolint:lll
 	script := "INSERT INTO " + listname + "(IP, mask) VALUES (?,?)"
 	result, err := storage.DB.ExecContext(ctx, script, ipData.IP, ipData.Mask)
@@ -74,6 +79,7 @@ func (storage *Storage) IPAddToList(ctx context.Context, listname string, logger
 	}
 	return int(id), nil
 }
+
 func (storage *Storage) IPRemoveFromList(ctx context.Context, listname string, logger storageData.Logger, ipData storageData.StorageIPData) error { //nolint:lll
 	script := "DELETE FROM " + listname + "WHERE IP = ? AND Mask = ?"
 	result, err := storage.DB.ExecContext(ctx, script, ipData.IP, ipData.Mask)
@@ -92,6 +98,7 @@ func (storage *Storage) IPRemoveFromList(ctx context.Context, listname string, l
 	}
 	return nil
 }
+
 func (storage *Storage) IPIsInList(ctx context.Context, listname string, logger storageData.Logger, ipData storageData.StorageIPData) (bool, error) { //nolint:lll
 	script := "SELECT id, IP FROM " + listname + "WHERE IP = ? AND Mask = ?"
 	row := storage.DB.QueryRowContext(ctx, script, ipData.IP, ipData.Mask)
@@ -106,6 +113,7 @@ func (storage *Storage) IPIsInList(ctx context.Context, listname string, logger 
 	}
 	return true, nil
 }
+
 func (storage *Storage) IPGetAllFromList(ctx context.Context, listname string, logger storageData.Logger) ([]storageData.StorageIPData, error) { //nolint:lll
 	resultIP := make([]storageData.StorageIPData, 0)
 	script := "SELECT id, mask, IP FROM " + listname

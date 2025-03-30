@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+
 	"github.com/spf13/viper"
 )
 
@@ -42,9 +43,11 @@ func (config *Config) Init(path string) error {
 	config.Logger.level = viper.GetString("LOG_LEVEL")
 	return nil
 }
+
 func (config *Config) GetAddress() string {
 	return config.address
 }
+
 func (config *Config) GetPort() string {
 	return config.port
 }

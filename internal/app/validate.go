@@ -1,10 +1,11 @@
 package app
 
 import (
-	storageData "antibf/internal/storage/storageData"
 	"errors"
 	"strconv"
 	"strings"
+
+	storageData "github.com/abredov/golang_fin/internal/storage/storageData"
 )
 
 var (
@@ -30,6 +31,7 @@ func SimpleRequestValidate(login string, password string, ip string) (storageDat
 	}
 	return request, nil
 }
+
 func SimpleIPDataValidate(ipData storageData.StorageIPData, isAllRequest bool) error {
 	var err error
 	if !isAllRequest {

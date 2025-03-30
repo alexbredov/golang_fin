@@ -1,10 +1,10 @@
 package app
 
 import (
-	"antibf/helpers"
-	storageData "antibf/internal/storage/storageData"
 	"context"
 	"errors"
+	"github.com/abredov/golang_fin/helpers"
+	storageData "github.com/abredov/golang_fin/internal/storage/storageData"
 	"net"
 	"strconv"
 	"time"

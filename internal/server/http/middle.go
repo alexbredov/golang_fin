@@ -1,9 +1,10 @@
 package httpinternal
 
 import (
-	"go.uber.org/zap"
 	"net/http"
 	"time"
+
+	"go.uber.org/zap"
 )
 
 func loggingMiddleware(next http.HandlerFunc, log Logger) http.HandlerFunc {

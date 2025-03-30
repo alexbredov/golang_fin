@@ -2,8 +2,9 @@ package integrationtests
 
 import (
 	"errors"
-	"github.com/spf13/viper"
 	"time"
+
+	"github.com/spf13/viper"
 )
 
 type Config struct {
@@ -34,6 +35,7 @@ type LoggerConf struct {
 func NewConfig() Config {
 	return Config{}
 }
+
 func (config *Config) Init(path string) error {
 	if path == "" {
 		err := errors.New("no path provided")
@@ -94,57 +96,75 @@ func (config *Config) Init(path string) error {
 func (config *Config) GetServerURL() string {
 	return config.address + ":" + config.port
 }
+
 func (config *Config) GetAddress() string {
 	return config.address
 }
+
 func (config *Config) GetPort() string {
 	return config.port
 }
+
 func (config *Config) GetServerShutdownTimeout() time.Duration {
 	return config.ServerShutdownTimeout
 }
+
 func (config *Config) GetDBName() string {
 	return config.dbName
 }
+
 func (config *Config) GetDBUser() string {
 	return config.dbUser
 }
+
 func (config *Config) GetDBPassword() string {
 	return config.dbPassword
 }
+
 func (config *Config) GetDBMaxOpenConnections() int {
 	return config.dbMaxOpenConnections
 }
+
 func (config *Config) GetDBMaxIdleConnections() int {
 	return config.dbMaxIdleConnections
 }
+
 func (config *Config) GetDBMaxConnectionLifetime() time.Duration {
 	return config.dbMaxConnectionLifetime
 }
+
 func (config *Config) GetDBTimeout() time.Duration {
 	return config.dbTimeout
 }
+
 func (config *Config) GetDBAddress() string {
 	return config.dbAddress
 }
+
 func (config *Config) GetDBPort() string {
 	return config.dbPort
 }
+
 func (config *Config) GetRedisAddress() string {
 	return config.redisAddress
 }
+
 func (config *Config) GetRedisPort() string {
 	return config.redisPort
 }
+
 func (config *Config) GetLimitLogin() int {
 	return config.limitLogin
 }
+
 func (config *Config) GetLimitPassword() int {
 	return config.limitPassword
 }
+
 func (config *Config) GetLimitIP() int {
 	return config.limitIP
 }
+
 func (config *Config) GetLimitTimeCheck() time.Duration {
 	return config.limitTimeCheck
 }
