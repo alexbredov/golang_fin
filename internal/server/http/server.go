@@ -1,7 +1,7 @@
-package http_internal
+package httpinternal
 
 import (
-	"antibf/internal/storage/storageData"
+	storageData "antibf/internal/storage/storageData"
 	"context"
 	"errors"
 	"go.uber.org/zap"

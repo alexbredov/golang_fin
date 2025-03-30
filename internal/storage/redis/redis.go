@@ -1,7 +1,7 @@
 package redisclient
 
 import (
-	"antibf/internal/storage/storageData"
+	storageData "antibf/internal/storage/storageData"
 	"context"
 	redisMock "github.com/alicebob/miniredis/v2"
 	redis "github.com/redis/go-redis/v9"

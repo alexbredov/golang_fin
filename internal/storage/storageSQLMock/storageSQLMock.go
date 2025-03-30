@@ -1,7 +1,7 @@
-package storageSQLMock
+package storagesqlmock
 
 import (
-	"antibf/internal/storage/storageData"
+	storageData "antibf/internal/storage/storageData"
 	"context"
 	"sort"
 	"strconv"

@@ -5,7 +5,7 @@ package integrationtests
 import (
 	"antibf/helpers"
 	"antibf/internal/logger"
-	"antibf/internal/storage/storageData"
+	storageData "antibf/internal/storage/storageData"
 	"context"
 	"database/sql"
 	"flag"

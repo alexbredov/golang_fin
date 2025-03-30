@@ -1,8 +1,8 @@
-package http_internal
+package httpinternal
 
 import (
 	"antibf/helpers"
-	"antibf/internal/storage/storageData"
+	storageData "antibf/internal/storage/storageData"
 	"context"
 	"encoding/json"
 	"errors"

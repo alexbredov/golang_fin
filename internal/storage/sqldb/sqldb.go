@@ -2,7 +2,7 @@ package sqldb
 
 import (
 	"antibf/helpers"
-	"antibf/internal/storage/storageData"
+	storageData "antibf/internal/storage/storageData"
 	"context"
 	"database/sql"
 	"errors"

@@ -1,4 +1,4 @@
-package http_internal
+package httpinternal
 
 import (
 	"go.uber.org/zap"

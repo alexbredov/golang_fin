@@ -1,12 +1,12 @@
 //go:build !integration
 
-package http_internal
+package httpinternal
 
 import (
 	"antibf/internal/app"
 	logger "antibf/internal/logger"
 	RedisStorage "antibf/internal/storage/redis"
-	"antibf/internal/storage/storageData"
+	storageData "antibf/internal/storage/storageData"
 	storageSQLMock "antibf/internal/storage/storageSQLMock"
 	"bytes"
 	"context"

@@ -1,7 +1,7 @@
 package app
 
 import (
-	"antibf/internal/storage/storageData"
+	storageData "antibf/internal/storage/storageData"
 	"errors"
 	"strconv"
 	"strings"
@@ -49,7 +49,7 @@ func SimpleIPDataValidate(ipData storageData.StorageIPData, isAllRequest bool) e
 	return nil
 }
 
-func checkIP(ip string, min int, max int) error {
+func checkIP(ip string, minimal int, maximal int) error {
 	parts := strings.Split(ip, ".")
 	if len(parts) != 4 {
 		return ErrBadIP
@@ -59,7 +59,7 @@ func checkIP(ip string, min int, max int) error {
 		if err != nil {
 			return err
 		}
-		if intPart < min || intPart > max {
+		if intPart < minimal || intPart > maximal {
 			return ErrBadIP
 		}
 	}

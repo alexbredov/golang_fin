@@ -3,7 +3,7 @@ package main
 import (
 	"antibf/internal/app"
 	"antibf/internal/logger"
-	http_internal "antibf/internal/server/http"
+	httpinternal "antibf/internal/server/http"
 	RedisStorage "antibf/internal/storage/redis"
 	SQLstorage "antibf/internal/storage/sqldb"
 	"context"
@@ -52,7 +52,7 @@ func main() {
 		log.Fatal("RedisDB Init fatal failure:" + err.Error())
 	}
 	antibf := app.New(log, storage, redis, &config)
-	server := http_internal.NewServer(log, antibf, &config)
+	server := httpinternal.NewServer(log, antibf, &config)
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 	defer cancel()
 

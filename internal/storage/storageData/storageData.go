@@ -1,4 +1,4 @@
-package storageData
+package storagedata
 
 import (
 	"antibf/helpers"
