@@ -4,7 +4,7 @@ import (
 	"context"
 	"strconv"
 
-	storageData "github.com/abredov/golang_fin/internal/storage/storageData"
+	storageData "github.com/alexbredov/golang_fin/internal/storage/storageData"
 	redisMock "github.com/alicebob/miniredis/v2"
 	redis "github.com/redis/go-redis/v9"
 )

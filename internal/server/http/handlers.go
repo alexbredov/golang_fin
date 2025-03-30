@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/abredov/golang_fin/helpers"
-	storageData "github.com/abredov/golang_fin/internal/storage/storageData"
+	"github.com/alexbredov/golang_fin/helpers"
+	storageData "github.com/alexbredov/golang_fin/internal/storage/storageData"
 )
 
 const correctAnswerText string = "Everything is OK"

@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	helpers "github.com/abredov/golang_fin/helpers"
-	loggercli "github.com/abredov/golang_fin/internal/logger-cli"
-	storageData "github.com/abredov/golang_fin/internal/storage/storageData"
+	helpers "github.com/alexbredov/golang_fin/helpers"
+	loggercli "github.com/alexbredov/golang_fin/internal/logger-cli"
+	storageData "github.com/alexbredov/golang_fin/internal/storage/storageData"
 )
 
 const correctAnswerText string = "Everything is OK"

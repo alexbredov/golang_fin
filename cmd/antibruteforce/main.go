@@ -8,11 +8,11 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/abredov/golang_fin/internal/app"
-	"github.com/abredov/golang_fin/internal/logger"
-	httpinternal "github.com/abredov/golang_fin/internal/server/http"
-	RedisStorage "github.com/abredov/golang_fin/internal/storage/redis"
-	SQLstorage "github.com/abredov/golang_fin/internal/storage/sqldb"
+	"github.com/alexbredov/golang_fin/internal/app"
+	"github.com/alexbredov/golang_fin/internal/logger"
+	httpinternal "github.com/alexbredov/golang_fin/internal/server/http"
+	RedisStorage "github.com/alexbredov/golang_fin/internal/storage/redis"
+	SQLstorage "github.com/alexbredov/golang_fin/internal/storage/sqldb"
 	_ "github.com/jackc/pgx/stdlib"
 )
 

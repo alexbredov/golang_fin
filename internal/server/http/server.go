@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	storageData "github.com/abredov/golang_fin/internal/storage/storageData"
+	storageData "github.com/alexbredov/golang_fin/internal/storage/storageData"
 	"go.uber.org/zap"
 )
 

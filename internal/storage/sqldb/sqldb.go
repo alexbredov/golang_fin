@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/abredov/golang_fin/helpers"
-	storageData "github.com/abredov/golang_fin/internal/storage/storageData"
+	"github.com/alexbredov/golang_fin/helpers"
+	storageData "github.com/alexbredov/golang_fin/internal/storage/storageData"
 	_ "github.com/jackc/pgx/stdlib"
 )
 

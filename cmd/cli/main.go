@@ -13,8 +13,8 @@ import (
 	"syscall"
 	"time"
 
-	helpers "github.com/abredov/golang_fin/helpers"
-	loggercli "github.com/abredov/golang_fin/internal/logger-cli"
+	helpers "github.com/alexbredov/golang_fin/helpers"
+	loggercli "github.com/alexbredov/golang_fin/internal/logger-cli"
 )
 
 var ErrAntiBFNotAvailable = errors.New("antibf is not available")

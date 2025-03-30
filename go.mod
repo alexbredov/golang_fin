@@ -1,4 +1,4 @@
-module github.com/abredov/golang_fin
+module github.com/alexbredov/golang_fin
 
 go 1.23.0
 

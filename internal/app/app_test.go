@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	logger "github.com/abredov/golang_fin/internal/logger"
-	redisclient "github.com/abredov/golang_fin/internal/storage/redis"
-	storageData "github.com/abredov/golang_fin/internal/storage/storageData"
-	storageSQLMock "github.com/abredov/golang_fin/internal/storage/storageSQLMock"
+	logger "github.com/alexbredov/golang_fin/internal/logger"
+	redisclient "github.com/alexbredov/golang_fin/internal/storage/redis"
+	storageData "github.com/alexbredov/golang_fin/internal/storage/storageData"
+	storageSQLMock "github.com/alexbredov/golang_fin/internal/storage/storageSQLMock"
 	"github.com/stretchr/testify/require"
 )
 

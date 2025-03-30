@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	storageData "github.com/abredov/golang_fin/internal/storage/storageData"
+	storageData "github.com/alexbredov/golang_fin/internal/storage/storageData"
 )
 
 var (
