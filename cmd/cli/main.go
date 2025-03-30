@@ -36,10 +36,10 @@ func init() {
 func main() {
 	flag.Parse()
 	if flag.Arg(0) == "version" {
-		printCliVersion()
+		printCLIVersion()
 		return
 	}
-	config := NewConfig()
+	config := NewCLIConfig()
 	err := config.Init(configPath)
 	if err != nil {
 		fmt.Println(err)

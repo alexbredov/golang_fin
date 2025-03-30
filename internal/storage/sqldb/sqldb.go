@@ -7,6 +7,7 @@ import (
 
 	"github.com/abredov/golang_fin/helpers"
 	storageData "github.com/abredov/golang_fin/internal/storage/storageData"
+	_ "github.com/jackc/pgx/stdlib"
 )
 
 type Storage struct {

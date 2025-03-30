@@ -15,7 +15,7 @@ services:
       redis:
         condition: service_started
     volumes:
-      - "./configs:/app/configs"
+      - "../configs:/app/configs"
     networks:
       - antibf_network
   pgsql-db:

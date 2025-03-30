@@ -13,6 +13,7 @@ import (
 	httpinternal "github.com/abredov/golang_fin/internal/server/http"
 	RedisStorage "github.com/abredov/golang_fin/internal/storage/redis"
 	SQLstorage "github.com/abredov/golang_fin/internal/storage/sqldb"
+	_ "github.com/jackc/pgx/stdlib"
 )
 
 var configFilePath string

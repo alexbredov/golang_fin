@@ -8,14 +8,14 @@ import (
 
 type Config struct {
 	Logger  LoggerConf
-	address string `mapstructure:"address"`
-	port    string `mapstructure:"port"`
+	address string `mapstructure:"ADDRESS"`
+	port    string `mapstructure:"PORT"`
 }
 type LoggerConf struct {
 	level string `mapstructure:"LOG_LEVEL"`
 }
 
-func NewConfig() *Config {
+func NewCLIConfig() *Config {
 	return &Config{}
 }
 

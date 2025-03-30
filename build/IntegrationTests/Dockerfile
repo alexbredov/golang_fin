@@ -12,6 +12,7 @@ RUN go mod download
 COPY . .
 ARG LDFLAGS
 RUN CGO_ENABLED=0 go build -ldflags "$LDFLAGS" -o ${BIN_FILE} integrationtests/*
+RUN ls -lah integrationtests/
 
 FROM alpine:3.21
 LABEL authors="Alexander"
@@ -23,5 +24,7 @@ COPY --from=build ${BIN_FILE} ${BIN_FILE}
 
 ENV CONFIG_FILE /etc/antibf/config.env
 COPY ./configs/docker/config.env ${CONFIG_FILE}
+
+RUN chmod +x ${BIN_FILE}
 
 CMD ${BIN_FILE} -config ${CONFIG_FILE} -test.v > integrationtestsLog.txt
