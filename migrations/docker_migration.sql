@@ -1,13 +1,11 @@
-CREATE TABLE whitelist
-    {
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    mask INT NOT NULL,
-    IP varchar(20) NOT NULL
-    };
+CREATE TABLE whitelist (
+                           id SERIAL PRIMARY KEY,
+                           mask INT NOT NULL,
+                           IP inet NOT NULL
+);
 
-CREATE TABLE blacklist
-    {
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    mask INT NOT NULL,
-    IP varchar(20) NOT NULL
-    };
+CREATE TABLE blacklist (
+                           id SERIAL PRIMARY KEY,
+                           mask INT NOT NULL,
+                           IP inet NOT NULL
+);

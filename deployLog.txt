@@ -1,0 +1,101 @@
+Compose now can delegate build to bake for better performances
+Just set COMPOSE_BAKE=true
+#0 building with "default" instance using docker driver
+
+#1 [antibf internal] load build definition from Dockerfile
+#1 transferring dockerfile: 642B 0.0s done
+#1 WARN: FromAsCasing: 'as' and 'FROM' keywords' casing do not match (line 1)
+#1 DONE 0.0s
+
+#2 [antibf internal] load metadata for docker.io/library/alpine:3.21
+#2 ...
+
+#3 [antibf internal] load metadata for docker.io/library/golang:1.23
+#3 DONE 1.6s
+
+#2 [antibf internal] load metadata for docker.io/library/alpine:3.21
+#2 DONE 1.6s
+
+#4 [antibf internal] load .dockerignore
+#4 transferring context: 2B 0.0s done
+#4 DONE 0.1s
+
+#5 [antibf internal] load build context
+#5 ...
+
+#6 [antibf build 1/7] FROM docker.io/library/golang:1.23@sha256:cb45cf739cf6bc9eaeacf75d3cd7c157e7d39b757216d813d8115d026ee32e75
+#6 resolve docker.io/library/golang:1.23@sha256:cb45cf739cf6bc9eaeacf75d3cd7c157e7d39b757216d813d8115d026ee32e75 0.1s done
+#6 DONE 0.1s
+
+#7 [antibf stage-1 1/3] FROM docker.io/library/alpine:3.21@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c
+#7 resolve docker.io/library/alpine:3.21@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c 0.1s done
+#7 DONE 0.1s
+
+#5 [antibf internal] load build context
+#5 transferring context: 22.53MB 0.9s done
+#5 DONE 0.9s
+
+#8 [antibf build 2/7] WORKDIR /go/src/
+#8 CACHED
+
+#9 [antibf build 3/7] COPY go.mod .
+#9 CACHED
+
+#10 [antibf build 4/7] COPY go.sum .
+#10 CACHED
+
+#11 [antibf build 5/7] RUN go mod download
+#11 CACHED
+
+#12 [antibf build 6/7] COPY . .
+#12 DONE 1.6s
+
+#13 [antibf build 7/7] RUN CGO_ENABLED=0 go build -ldflags "$LDFLAGS" -o /opt/antibf/antibf-app cmd/antibruteforce/*
+#13 DONE 42.1s
+
+#14 [antibf stage-1 2/3] COPY --from=build /opt/antibf/antibf-app /opt/antibf/antibf-app
+#14 CACHED
+
+#15 [antibf stage-1 3/3] COPY ./configs/docker/config.env /etc/antibf/config.env
+#15 CACHED
+
+#16 [antibf] exporting to image
+#16 exporting layers done
+#16 exporting manifest sha256:2c68535b695a7def6f97e05b735901dafc9e9aba6cc26d9a62a1127dce6dca99 0.0s done
+#16 exporting config sha256:cb8ead8e11a6af47bf78332915b5dc9481d5a13d654e162f78897cc2d8d71222 done
+#16 exporting attestation manifest sha256:aaabaed9e7c15ca0cccea68dccc80b302e64f2753757c471c7693c09b05209a0 0.0s done
+#16 exporting manifest list sha256:fb9298324a693fa216db0a83c511186e9e9ddcf201d3cf0618235a5021db94c6 0.0s done
+#16 naming to docker.io/library/deployments-antibf:latest
+#16 naming to docker.io/library/deployments-antibf:latest done
+#16 unpacking to docker.io/library/deployments-antibf:latest 0.0s done
+#16 DONE 0.2s
+
+#17 [antibf] resolving provenance for metadata file
+#17 DONE 0.1s
+Attaching to antibf, pgsql-db, redis
+redis     | 1:C 30 Mar 2025 12:19:07.454 * oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo
+redis     | 1:C 30 Mar 2025 12:19:07.454 * Redis version=7.4.2, bits=64, commit=00000000, modified=0, pid=1, just started
+redis     | 1:C 30 Mar 2025 12:19:07.454 # Warning: no config file specified, using the default config. In order to specify a config file use redis-server /path/to/redis.conf
+redis     | 1:M 30 Mar 2025 12:19:07.460 * monotonic clock: POSIX clock_gettime
+redis     | 1:M 30 Mar 2025 12:19:07.487 * Running mode=standalone, port=6379.
+redis     | 1:M 30 Mar 2025 12:19:07.491 * Server initialized
+redis     | 1:M 30 Mar 2025 12:19:07.509 * Loading RDB produced by version 7.4.2
+redis     | 1:M 30 Mar 2025 12:19:07.510 * RDB age 281 seconds
+redis     | 1:M 30 Mar 2025 12:19:07.510 * RDB memory usage when created 0.90 Mb
+redis     | 1:M 30 Mar 2025 12:19:07.510 * Done loading RDB, keys loaded: 0, keys expired: 0.
+redis     | 1:M 30 Mar 2025 12:19:07.510 * DB loaded from disk: 0.019 seconds
+redis     | 1:M 30 Mar 2025 12:19:07.510 * Ready to accept connections tcp
+pgsql-db  | 
+pgsql-db  | PostgreSQL Database directory appears to contain a database; Skipping initialization
+pgsql-db  | 
+[Kantibf exited with code 0
+[Kantibf exited with code 1
+[Kantibf exited with code 1
+[Kantibf exited with code 1
+[Kantibf exited with code 1
+[Kantibf exited with code 1
+[Kantibf exited with code 1
+[Kantibf exited with code 1
+[Kantibf exited with code 1
+[Kantibf exited with code 1
+[Kantibf exited with code 1

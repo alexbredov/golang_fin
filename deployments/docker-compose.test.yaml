@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   integration_tests:
     container_name: integration_tests
