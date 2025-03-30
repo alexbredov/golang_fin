@@ -90,7 +90,7 @@ help - show this message
 long: WhitelistAdd [subnet], short: wladd [subnet] - add subnet to whitelist
 long: Remove`
 }
-func (comcont *CommandController) addToList(arg []string, listname string) string {
+func (comcont *CommandController) addToList(arg []string, listname string) string { //nolint:dupl
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if len(arg) != 2 {
@@ -143,7 +143,7 @@ func (comcont *CommandController) addToList(arg []string, listname string) strin
 	comcont.logger.Info(msg)
 	return msg
 }
-func (comcont *CommandController) removeFromList(arg []string, listname string) string {
+func (comcont *CommandController) removeFromList(arg []string, listname string) string { //nolint:dupl
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if len(arg) != 2 {
@@ -380,6 +380,7 @@ func (comcont *CommandController) clearBucketByTag(arg []string, typeClear strin
 		comcont.logger.Error(errStr)
 		return errStr
 	}
+	defer resp.Body.Close()
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		errStr := "Error: " + err.Error()

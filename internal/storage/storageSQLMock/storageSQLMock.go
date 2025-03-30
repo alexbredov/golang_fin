@@ -32,7 +32,7 @@ func (mock *StorageSQLMock) Close(_ context.Context, _ storageData.Logger) error
 	return nil
 }
 
-func (mock *StorageSQLMock) IPAddToList(ctx context.Context, listname string, _ storageData.Logger, ipData storageData.StorageIPData) (int, error) {
+func (mock *StorageSQLMock) IPAddToList(ctx context.Context, listname string, _ storageData.Logger, ipData storageData.StorageIPData) (int, error) { //nolint:lll
 	select {
 	case <-ctx.Done():
 		return 0, storageData.ErrStorageTimeout
@@ -55,7 +55,7 @@ func (mock *StorageSQLMock) IPAddToList(ctx context.Context, listname string, _ 
 		return ipData.ID, nil
 	}
 }
-func (mock *StorageSQLMock) IPIsInList(ctx context.Context, listname string, _ storageData.Logger, ipData storageData.StorageIPData) (bool, error) {
+func (mock *StorageSQLMock) IPIsInList(ctx context.Context, listname string, _ storageData.Logger, ipData storageData.StorageIPData) (bool, error) { //nolint:lll
 	select {
 	case <-ctx.Done():
 		return false, storageData.ErrStorageTimeout
@@ -76,7 +76,7 @@ func (mock *StorageSQLMock) IPIsInList(ctx context.Context, listname string, _ s
 		return ok, err
 	}
 }
-func (mock *StorageSQLMock) IPRemoveFromList(ctx context.Context, listname string, _ storageData.Logger, ipData storageData.StorageIPData) error {
+func (mock *StorageSQLMock) IPRemoveFromList(ctx context.Context, listname string, _ storageData.Logger, ipData storageData.StorageIPData) error { //nolint:lll
 	select {
 	case <-ctx.Done():
 		return storageData.ErrStorageTimeout
@@ -107,7 +107,7 @@ func (mock *StorageSQLMock) IPRemoveFromList(ctx context.Context, listname strin
 		return nil
 	}
 }
-func (mock *StorageSQLMock) IPGetAllFromList(ctx context.Context, listname string, _ storageData.Logger) ([]storageData.StorageIPData, error) {
+func (mock *StorageSQLMock) IPGetAllFromList(ctx context.Context, listname string, _ storageData.Logger) ([]storageData.StorageIPData, error) { //nolint:lll
 	resultIPData := make([]storageData.StorageIPData, 0)
 	select {
 	case <-ctx.Done():

@@ -63,7 +63,7 @@ func (red *RedisStorage) Close(ctx context.Context, logger storageData.Logger) e
 	}
 	return nil
 }
-func (red *RedisStorage) IncreaseAndGetBucketValue(ctx context.Context, logger storageData.Logger, bucketName string) (int64, error) {
+func (red *RedisStorage) IncreaseAndGetBucketValue(ctx context.Context, logger storageData.Logger, bucketName string) (int64, error) { //nolint:lll
 	result, err := red.redisdb.Incr(ctx, bucketName).Result()
 	if err != nil {
 		logger.Error("RedisDB IncreaseAndGetBucketValue error: " + err.Error())
@@ -71,7 +71,7 @@ func (red *RedisStorage) IncreaseAndGetBucketValue(ctx context.Context, logger s
 	}
 	return result, nil
 }
-func (red *RedisStorage) SetBucketValue(ctx context.Context, logger storageData.Logger, bucketName string, value int) error {
+func (red *RedisStorage) SetBucketValue(ctx context.Context, logger storageData.Logger, bucketName string, value int) error { //nolint:lll
 	strValue := strconv.Itoa(value)
 	err := red.redisdb.Set(ctx, bucketName, strValue, 0).Err()
 	if err != nil {

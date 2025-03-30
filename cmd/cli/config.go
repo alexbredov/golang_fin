@@ -32,7 +32,8 @@ func (config *Config) Init(path string) error {
 	viper.AutomaticEnv()
 	err := viper.ReadInConfig()
 	if err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+		var configFileNotFoundError viper.ConfigFileNotFoundError
+		if !errors.As(err, &configFileNotFoundError) {
 			return err
 		}
 	}

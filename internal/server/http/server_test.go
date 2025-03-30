@@ -83,7 +83,7 @@ func (config *ConfigTest) GetLimitTimeCheck() time.Duration {
 	return 1 * time.Minute
 }
 
-func TestServer_RESTWhiteList(t *testing.T) {
+func TestServer_RESTWhiteList(t *testing.T) { //nolint:dupl
 	t.Parallel()
 	t.Run("IPAddToWL", func(t *testing.T) {
 		t.Parallel()
@@ -190,7 +190,7 @@ func TestServer_RESTWhiteList(t *testing.T) {
 		require.Equal(t, respExpect, string(respBody))
 	})
 }
-func TestServer_RESTBlackList(t *testing.T) {
+func TestServer_RESTBlackList(t *testing.T) { //nolint:dupl
 	t.Parallel()
 	t.Run("IPAddToBL", func(t *testing.T) {
 		t.Parallel()

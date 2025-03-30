@@ -39,9 +39,9 @@ type Logger interface {
 type Storage interface {
 	Init(ctx context.Context, logger storageData.Logger, config storageData.Config) error
 	Close(ctx context.Context, logger storageData.Logger) error
-	IPAddToList(ctx context.Context, listname string, logger storageData.Logger, IPData storageData.StorageIPData) (int, error)
-	IPRemoveFromList(ctx context.Context, listname string, logger storageData.Logger, IPData storageData.StorageIPData) error
-	IPIsInList(ctx context.Context, listname string, logger storageData.Logger, IPData storageData.StorageIPData) (bool, error)
+	IPAddToList(ctx context.Context, listname string, logger storageData.Logger, IPData storageData.StorageIPData) (int, error) //nolint:lll
+	IPRemoveFromList(ctx context.Context, listname string, logger storageData.Logger, IPData storageData.StorageIPData) error   //nolint:lll
+	IPIsInList(ctx context.Context, listname string, logger storageData.Logger, IPData storageData.StorageIPData) (bool, error) //nolint:lll
 	IPGetAllFromList(ctx context.Context, listname string, logger storageData.Logger) ([]storageData.StorageIPData, error)
 }
 type BucketStorage interface {
@@ -229,7 +229,8 @@ func (a *App) IPRemoveFromList(ctx context.Context, listname string, ipData stor
 		a.logger.Error(message)
 		return err
 	}
-	message := helpers.StringBuild("IP successfully removed from "+listname+"(IP: ", ipData.IP, "/", strconv.Itoa(ipData.Mask), ")")
+	message := helpers.StringBuild("IP successfully removed from "+listname+"(IP: ", ipData.IP,
+		"/", strconv.Itoa(ipData.Mask), ")")
 	a.logger.Info(message)
 	return nil
 }
