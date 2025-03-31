@@ -1,14 +1,12 @@
 module github.com/alexbredov/golang_fin
 
-go 1.23.0
-
-toolchain go1.23.7
+go 1.23.7
 
 require (
 	github.com/alicebob/miniredis/v2 v2.34.0
 	github.com/jackc/pgx v3.6.2+incompatible
 	github.com/redis/go-redis/v9 v9.7.3
-	github.com/spf13/viper v1.20.0
+	github.com/spf13/viper v1.20.1
 	github.com/stretchr/testify v1.10.0
 	go.uber.org/zap v1.27.0
 )

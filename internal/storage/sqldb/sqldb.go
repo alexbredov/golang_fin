@@ -37,14 +37,15 @@ func (storage *Storage) Connect(ctx context.Context, logger storageData.Logger, 
 	case <-ctx.Done():
 		return storageData.ErrStorageTimeout
 	default:
-		dsn := helpers.StringBuild(config.GetDBUser(), ":", config.GetDBPassword(), "@tcp(",
-			config.GetDBAddress(), ":", config.GetDBPort(), ")/", config.GetDBName())
+		dsn := helpers.StringBuild("postgres://", config.GetDBUser(), ":", config.GetDBPassword(), "@",
+			config.GetDBAddress(), ":", config.GetDBPort(), "/", config.GetDBName(), "?sslmode=disable")
 		var err error
 		storage.DB, err = sql.Open("pgx", dsn)
 		if err != nil {
 			logger.Error("SQL opening connection failed: " + err.Error())
 			return err
 		}
+		logger.Info("SQL opened connection with dsn: " + dsn)
 		storage.DB.SetConnMaxLifetime(config.GetDBMaxConnectionLifetime())
 		storage.DB.SetMaxIdleConns(config.GetDBMaxIdleConnections())
 		storage.DB.SetMaxOpenConns(config.GetDBMaxOpenConnections())

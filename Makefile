@@ -1,7 +1,7 @@
 BIN := "./bin/antibf"
 BIN_CLI :="./bin/cli"
 DOCKER_IMG="antibf:develop"
-DSN="postgres:SecurePass@/OTUSAntibf"
+DSN="postgres://postgres:SecurePass@/OTUSAntibf"
 
 GIT_HASH := $(shell git log --format="%h" -n 1)
 LDFLAGS := -X main.release="develop" -X main.buildDate=$(shell date -u +%Y-%m-%dT%H:%M:%S) -X main.gitHash=$(GIT_HASH)

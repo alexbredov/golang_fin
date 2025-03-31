@@ -606,7 +606,8 @@ func InitAndConnectDB(ctx context.Context, logger storageData.Logger, config sto
 	default:
 		defer recover()
 		var err error
-		dsn := helpers.StringBuild(config.GetDBUser(), ":", config.GetDBPassword(), "@tcp(", config.GetDBAddress(), ":", config.GetDBPort(), ")/", config.GetDBName())
+		dsn := helpers.StringBuild("postgres://", config.GetDBUser(), ":", config.GetDBPassword(), "@",
+			config.GetDBAddress(), ":", config.GetDBPort(), "/", config.GetDBName(), "?sslmode=disable")
 		pgSQL_DBint, err := sql.Open("pgx", dsn)
 		if err != nil {
 			logger.Error("SQL Open connection failed:" + err.Error())

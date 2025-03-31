@@ -39,7 +39,17 @@ func main() {
 		fmt.Println(err)
 		panic(err)
 	}
+	log.Info("Config path: " + configFilePath)
 	log.Info("Server Address: " + config.GetAddress())
+	log.Info("SQL Address:" + config.GetDBAddress() + ":" + config.GetDBPort())
+	log.Info("Redis Address:" + config.GetRedisAddress() + ":" + config.GetRedisPort())
+	files, err := os.ReadDir("/etc/antibf")
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	for _, file := range files {
+		log.Info(file.Name())
+	}
 	var storage app.Storage
 	ctxStorage, cancelStorage := context.WithTimeout(context.Background(), config.GetDBTimeout())
 	storage = SQLstorage.New()
