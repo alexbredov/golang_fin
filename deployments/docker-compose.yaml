@@ -1,0 +1,53 @@
+services:
+  antibf:
+    container_name: antibf
+    build:
+      context: ../
+      dockerfile: ./build/Dockerfile
+    env_file:
+      - ../configs/docker/config.env
+    restart: always
+    ports:
+      - "4000:4000"
+    depends_on:
+      pgsql-db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - "../configs/docker:/app/configs"
+    networks:
+      - antibf_network
+  pgsql-db:
+    container_name: pgsql-db
+    image: postgres:alpine3.21
+    restart: always
+    env_file:
+      - ../configs/docker/config.env
+    healthcheck:
+      #test: ["CMD-SHELL", "POSTGRES_PASSWORD=$${POSTGRES_PASSWORD} psql -U $${POSTGRES_USER} -d $${POSTGRES_DB} -c 'SELECT 1;' || exit 1" ]
+      test: ["CMD-SHELL", "psql -U $${POSTGRES_USER} -d $${POSTGRES_DB} -c 'SELECT 1;' || exit 1"]
+      interval: 20s
+      timeout: 15s
+      retries: 10
+    ports:
+      - "5432:5432"
+    expose:
+      - "5432"
+    volumes:
+      - ../migrations/docker_migration.sql:/docker-entrypoint-initdb.d/dump.sql
+    networks:
+      - antibf_network
+  redis:
+    image: redis:7-alpine3.21
+    restart: always
+    container_name: redis
+    ports:
+      - "6379:6379"
+    expose:
+      - "6379"
+    networks:
+      - antibf_network
+networks:
+  antibf_network:
+    driver: bridge

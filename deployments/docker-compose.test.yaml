@@ -1,0 +1,19 @@
+services:
+  integration_tests:
+    container_name: integration_tests
+    build:
+      context: ../
+      dockerfile: ./build/IntegrationTests/Dockerfile
+    env_file:
+      - ../configs/docker/config.env
+    depends_on:
+        pgsql-db:
+          condition: service_healthy
+        redis:
+          condition: service_started
+        antibf:
+          condition: service_started
+    volumes:
+      - "./configs:/app/configs"
+    networks:
+      - antibf_network
