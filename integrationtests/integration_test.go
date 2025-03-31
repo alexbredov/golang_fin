@@ -169,7 +169,7 @@ func TestRemoveFromWL(t *testing.T) {
 		require.NoError(t, err)
 		req.Header.Set("Content-Type", "application/json")
 		client := &http.Client{}
-		resp, err = client.Do(req)
+		resp, err := client.Do(req)
 		require.NoError(t, err)
 		defer resp.Body.Close()
 		respBody, err := io.ReadAll(resp.Body)
@@ -194,7 +194,7 @@ func TestRemoveFromWL(t *testing.T) {
 		require.NoError(t, err)
 		req.Header.Set("Content-Type", "application/json")
 		client := &http.Client{}
-		resp, err = client.Do(req)
+		resp, err := client.Do(req)
 		require.NoError(t, err)
 		defer resp.Body.Close()
 		respBody, err := io.ReadAll(resp.Body)
@@ -228,7 +228,7 @@ func TestIPIsInWL(t *testing.T) {
 		require.NoError(t, err)
 		req.Header.Set("Content-Type", "application/json")
 		client := &http.Client{}
-		resp, err = client.Do(req)
+		resp, err := client.Do(req)
 		require.NoError(t, err)
 		defer resp.Body.Close()
 		respBody, err := io.ReadAll(resp.Body)
@@ -249,7 +249,7 @@ func TestIPIsInWL(t *testing.T) {
 		require.NoError(t, err)
 		req.Header.Set("Content-Type", "application/json")
 		client := &http.Client{}
-		resp, err = client.Do(req)
+		resp, err := client.Do(req)
 		require.NoError(t, err)
 		defer resp.Body.Close()
 		respBody, err := io.ReadAll(resp.Body)
@@ -278,7 +278,7 @@ func TestIPGetAllInWL(t *testing.T) {
 		require.NoError(t, err)
 		req.Header.Set("Content-Type", "application/json")
 		client := &http.Client{}
-		resp, err = client.Do(req)
+		resp, err := client.Do(req)
 		require.NoError(t, err)
 		defer resp.Body.Close()
 		respBody, err := io.ReadAll(resp.Body)
@@ -371,7 +371,7 @@ func TestRemoveFromBL(t *testing.T) {
 		require.NoError(t, err)
 		req.Header.Set("Content-Type", "application/json")
 		client := &http.Client{}
-		resp, err = client.Do(req)
+		resp, err := client.Do(req)
 		require.NoError(t, err)
 		defer resp.Body.Close()
 		respBody, err := io.ReadAll(resp.Body)
@@ -396,7 +396,7 @@ func TestRemoveFromBL(t *testing.T) {
 		require.NoError(t, err)
 		req.Header.Set("Content-Type", "application/json")
 		client := &http.Client{}
-		resp, err = client.Do(req)
+		resp, err := client.Do(req)
 		require.NoError(t, err)
 		defer resp.Body.Close()
 		respBody, err := io.ReadAll(resp.Body)
@@ -430,7 +430,7 @@ func TestIPIsInBL(t *testing.T) {
 		require.NoError(t, err)
 		req.Header.Set("Content-Type", "application/json")
 		client := &http.Client{}
-		resp, err = client.Do(req)
+		resp, err := client.Do(req)
 		require.NoError(t, err)
 		defer resp.Body.Close()
 		respBody, err := io.ReadAll(resp.Body)
@@ -451,7 +451,7 @@ func TestIPIsInBL(t *testing.T) {
 		require.NoError(t, err)
 		req.Header.Set("Content-Type", "application/json")
 		client := &http.Client{}
-		resp, err = client.Do(req)
+		resp, err := client.Do(req)
 		require.NoError(t, err)
 		defer resp.Body.Close()
 		respBody, err := io.ReadAll(resp.Body)
@@ -480,7 +480,7 @@ func TestIPGetAllInBL(t *testing.T) {
 		require.NoError(t, err)
 		req.Header.Set("Content-Type", "application/json")
 		client := &http.Client{}
-		resp, err = client.Do(req)
+		resp, err := client.Do(req)
 		require.NoError(t, err)
 		defer resp.Body.Close()
 		respBody, err := io.ReadAll(resp.Body)
@@ -514,7 +514,7 @@ func TestClearBucketForLogin(t *testing.T) {
 		require.NoError(t, err)
 		req.Header.Set("Content-Type", "application/json")
 		client := &http.Client{}
-		resp, err = client.Do(req)
+		resp, err := client.Do(req)
 		require.NoError(t, err)
 		defer resp.Body.Close()
 		respBody, err := io.ReadAll(resp.Body)
@@ -545,7 +545,7 @@ func TestClearBucketForIP(t *testing.T) {
 		require.NoError(t, err)
 		req.Header.Set("Content-Type", "application/json")
 		client := &http.Client{}
-		resp, err = client.Do(req)
+		resp, err := client.Do(req)
 		require.NoError(t, err)
 		defer resp.Body.Close()
 		respBody, err := io.ReadAll(resp.Body)
@@ -566,16 +566,12 @@ func TestAuthorizationRequest(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
 		defer cancel()
 		url := helpers.StringBuild("http://", config.GetServerURL(), "/request/")
-		jsonStr := []byte(`{
-			"Login":"user"
-			"Password":"PassGood"
-			"IP":"192.168.64.12"
-		}`)
-		req, err := http.NewRequest("GET", url, bytes.NewBuffer(jsonStr))
+		jsonStr := []byte(`{"Login":"user","Password":"PassGood","IP":"192.168.64.12"}`)
+		req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
 		require.NoError(t, err)
 		req.Header.Set("Content-Type", "application/json")
 		client := &http.Client{}
-		resp, err = client.Do(req)
+		resp, err := client.Do(req)
 		require.NoError(t, err)
 		defer resp.Body.Close()
 		respBody, err := io.ReadAll(resp.Body)
@@ -657,6 +653,7 @@ func cleanDBandRedis(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	return err
 }
 
 func closeDBandRedis(ctx context.Context) error {
