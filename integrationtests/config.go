@@ -9,27 +9,27 @@ import (
 
 type Config struct {
 	Logger                  LoggerConf    `mapstructure:"Logger"`
-	ServerShutdownTimeout   time.Duration `mapstructure:"server_shutdown_timeout"`
-	dbMaxConnectionLifetime time.Duration `mapstructure:"db_max_conn_lifetime"`
-	dbTimeout               time.Duration `mapstructure:"db_timeout"`
-	limitTimeCheck          time.Duration `mapstructure:"limit_timecheck"`
-	address                 string        `mapstructure:"address"`
-	port                    string        `mapstructure:"port"`
-	redisAddress            string        `mapstructure:"redis_address"`
-	redisPort               string        `mapstructure:"redis_port"`
-	dbAddress               string        `mapstructure:"db_address"`
-	dbPort                  string        `mapstructure:"db_port"`
+	ServerShutdownTimeout   time.Duration `mapstructure:"SERVER_SHUTDOWN_TIMEOUT"`
+	dbMaxConnectionLifetime time.Duration `mapstructure:"DB_MAX_CONN_LIFETIME"`
+	dbTimeout               time.Duration `mapstructure:"DB_TIMEOUT"`
+	limitTimeCheck          time.Duration `mapstructure:"LIMIT_TIMECHECK"`
+	address                 string        `mapstructure:"ADDRESS"`
+	port                    string        `mapstructure:"PORT"`
+	redisAddress            string        `mapstructure:"REDIS_ADDRESS"`
+	redisPort               string        `mapstructure:"REDIS_PORT"`
+	dbAddress               string        `mapstructure:"DB_ADDRESS"`
+	dbPort                  string        `mapstructure:"DB_PORT"`
 	dbName                  string        `mapstructure:"POSTGRES_DB"`
 	dbUser                  string        `mapstructure:"POSTGRES_USER"`
 	dbPassword              string        `mapstructure:"POSTGRES_PASSWORD"`
 	dbMaxOpenConnections    int           `mapstructure:"DB_MAX_OPEN_CONNS"`
 	dbMaxIdleConnections    int           `mapstructure:"DB_MAX_IDLE_CONNS"`
-	limitLogin              int           `mapstructure:"limit_login"`
-	limitPassword           int           `mapstructure:"limit_password"`
-	limitIP                 int           `mapstructure:"limit_ip"`
+	limitLogin              int           `mapstructure:"LIMIT_LOGIN"`
+	limitPassword           int           `mapstructure:"LIMIT_PASSWORD"`
+	limitIP                 int           `mapstructure:"LIMIT_IP"`
 }
 type LoggerConf struct {
-	Level string `mapstructure:"log_level"`
+	Level string `mapstructure:"LOG_LEVEL"`
 }
 
 func NewConfig() Config {
@@ -73,23 +73,23 @@ func (config *Config) Init(path string) error {
 	}
 	config.address = viper.GetString("ADDRESS")
 	config.port = viper.GetString("PORT")
-	config.ServerShutdownTimeout = viper.GetDuration("server_shutdown_timeout")
+	config.ServerShutdownTimeout = viper.GetDuration("SERVER_SHUTDOWN_TIMEOUT")
 	config.dbName = viper.GetString("POSTGRES_DB")
 	config.dbUser = viper.GetString("POSTGRES_USER")
 	config.dbPassword = viper.GetString("POSTGRES_PASSWORD")
 	config.dbMaxOpenConnections = viper.GetInt("DB_MAX_OPEN_CONNS")
 	config.dbMaxIdleConnections = viper.GetInt("DB_MAX_IDLE_CONNS")
-	config.dbMaxConnectionLifetime = viper.GetDuration("db_max_conn_lifetime")
-	config.dbTimeout = viper.GetDuration("db_timeout")
+	config.dbMaxConnectionLifetime = viper.GetDuration("DB_MAX_CONN_LIFETIME")
+	config.dbTimeout = viper.GetDuration("DB_TIMEOUT")
 	config.Logger.Level = viper.GetString("LOG_LEVEL")
 	config.dbAddress = viper.GetString("DB_ADDRESS")
 	config.dbPort = viper.GetString("DB_PORT")
 	config.redisAddress = viper.GetString("REDIS_ADDRESS")
 	config.redisPort = viper.GetString("REDIS_PORT")
-	config.limitTimeCheck = viper.GetDuration("limit_timecheck")
-	config.limitLogin = viper.GetInt("limit_login")
-	config.limitPassword = viper.GetInt("limit_password")
-	config.limitIP = viper.GetInt("limit_ip")
+	config.limitTimeCheck = viper.GetDuration("LIMIT_TIMECHECK")
+	config.limitLogin = viper.GetInt("LIMIT_LOGIN")
+	config.limitPassword = viper.GetInt("LIMIT_PASSWORD")
+	config.limitIP = viper.GetInt("LIMIT_IP")
 	return nil
 }
 

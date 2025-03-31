@@ -1,5 +1,3 @@
-//go:build integration
-
 package integrationtests
 
 import (
@@ -50,49 +48,54 @@ type InputTag struct {
 }
 
 func init() {
-	flag.StringVar(&configFilePath, "config", "./configs/docker/", "Path to config file")
+	flag.StringVar(&configFilePath, "config", "../configs/", "Path to config file")
 }
 
 func TestMain(m *testing.M) {
 	flag.Parse()
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 	defer cancel()
+	log.Info("Creating config")
 	config = NewConfig()
-	err := config.Init(configFilePath)
-	if err != nil {
+	if err := config.Init(configFilePath); err != nil {
 		fmt.Println(err)
+		os.Exit(1)
 	}
+
+	var err error
 	log, err = logger.New(config.Logger.Level)
 	if err != nil {
 		fmt.Println(err)
+		os.Exit(1)
 	}
-	for {
-		select {
-		case <-ctx.Done():
-			log.Info("Integration tests failed")
-			os.Exit(1)
-		default:
-			pgSQL_DB, err = InitAndConnectDB(ctx, log, &config)
-			if err != nil {
-				log.Error("PGSQL InitAndConnectDB err: " + err.Error())
-				cancel()
-			}
-			reddb, err = InitAndConnectRedis(ctx, log, &config)
-			log.Info("Integration tests are up and running")
-			exitCode := m.Run()
-			log.Info("Exit code:" + strconv.Itoa(exitCode))
-			err = cleanDBandRedis(ctx)
-			if err != nil {
-				cancel()
-			}
-			err = closeDBandRedis(ctx)
-			if err != nil {
-				cancel()
-			}
-			log.Info("Integration tests complete")
-			os.Exit(exitCode)
-		}
+
+	pgSQL_DB, err = InitAndConnectDB(ctx, log, &config)
+	if err != nil {
+		log.Error("PGSQL InitAndConnectDB err: " + err.Error())
+		os.Exit(1)
 	}
+	log.Info("PGSQL InitAndConnectDB success")
+
+	reddb, err = InitAndConnectRedis(ctx, log, &config)
+	if err != nil {
+		log.Error("Redis InitAndConnect err: " + err.Error())
+		os.Exit(1)
+	}
+	log.Info("Redis InitAndConnect success")
+
+	log.Info("Integration tests are up and running")
+
+	exitCode := m.Run()
+
+	// Очистка после тестов
+	if err := cleanDBandRedis(ctx, log); err != nil {
+		log.Error("Error cleaning DB and Redis: " + err.Error())
+	}
+	if err := closeDBandRedis(ctx, log); err != nil {
+		log.Error("Error closing DB and Redis: " + err.Error())
+	}
+	log.Info("Integration tests complete")
+	os.Exit(exitCode)
 }
 
 func TestAddToWL(t *testing.T) {
@@ -110,7 +113,7 @@ func TestAddToWL(t *testing.T) {
 		require.Equal(t, answer.Text, "Everything is OK")
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
 		defer cancel()
-		script := `SELECT IP,mask FROM whitelist WHERE IP = "192.168.64.0" AND mask=24`
+		script := `SELECT IP,mask FROM whitelist WHERE IP = '192.168.64.0' AND mask=24`
 		row := pgSQL_DB.QueryRowContext(ctx, script)
 		var IP string
 		var mask int
@@ -118,13 +121,14 @@ func TestAddToWL(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, IP, "192.168.64.0")
 		require.Equal(t, mask, 24)
-		err = cleanDBandRedis(ctx)
+		err = cleanDBandRedis(ctx, log)
 		require.NoError(t, err)
+		log.Info("AddToWhiteList_Success done")
 	})
 	t.Run("AddToWhiteList_Failure", func(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
 		defer cancel()
-		script := `INSERT INTO blacklist(IP,mask) VALUES ("192.168.64.0",24)`
+		script := `INSERT INTO blacklist(IP,mask) VALUES ('192.168.64.0',24)`
 		_, err := pgSQL_DB.ExecContext(ctx, script)
 		require.Error(t, err)
 		url := helpers.StringBuild("http://", config.GetServerURL(), "/whitelist/")
@@ -138,24 +142,25 @@ func TestAddToWL(t *testing.T) {
 		err = json.Unmarshal(respBody, &answer)
 		require.NoError(t, err)
 		require.Equal(t, answer.Text, "IP is already in blacklist")
-		script = `SELECT IP,mask FROM whitelist WHERE IP = "192.168.64.0" AND mask=24`
+		script = `SELECT IP,mask FROM whitelist WHERE IP = '192.168.64.0' AND mask=24`
 		row := pgSQL_DB.QueryRowContext(ctx, script)
 		var IP string
 		var mask int
 		err = row.Scan(&IP, &mask)
 		require.Truef(t, errors.Is(err, sql.ErrNoRows), "actual error %q", err)
-		err = cleanDBandRedis(ctx)
+		err = cleanDBandRedis(ctx, log)
 		require.NoError(t, err)
+		log.Info("AddToWhiteList_Failure done")
 	})
 }
 func TestRemoveFromWL(t *testing.T) {
 	t.Run("RemoveFromWhiteList_Success", func(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
 		defer cancel()
-		script := `INSERT INTO whitelist(IP,mask) VALUES ("192.168.64.0",24)`
+		script := `INSERT INTO whitelist(IP,mask) VALUES ('192.168.64.0',24)`
 		_, err := pgSQL_DB.ExecContext(ctx, script)
 		require.NoError(t, err)
-		script = `SELECT IP,mask FROM whitelist WHERE IP = "192.168.64.0" AND mask=24`
+		script = `SELECT IP,mask FROM whitelist WHERE IP = '192.168.64.0' AND mask=24`
 		row := pgSQL_DB.QueryRowContext(ctx, script)
 		var IP string
 		var mask int
@@ -178,12 +183,13 @@ func TestRemoveFromWL(t *testing.T) {
 		err = json.Unmarshal(respBody, &answer)
 		require.NoError(t, err)
 		require.Equal(t, answer.Text, "Everything is OK")
-		script = `SELECT IP,mask FROM whitelist WHERE IP = "192.168.64.0" AND mask=24`
+		script = `SELECT IP,mask FROM whitelist WHERE IP = '192.168.64.0' AND mask=24`
 		row = pgSQL_DB.QueryRowContext(ctx, script)
 		err = row.Scan(&IP, &mask)
 		require.Truef(t, errors.Is(err, sql.ErrNoRows), "actual error %q", err)
-		err = cleanDBandRedis(ctx)
+		err = cleanDBandRedis(ctx, log)
 		require.NoError(t, err)
+		log.Info("RemoveFromWhiteList_Success done")
 	})
 	t.Run("RemoveFromWhiteList_Failure", func(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
@@ -203,18 +209,19 @@ func TestRemoveFromWL(t *testing.T) {
 		err = json.Unmarshal(respBody, &answer)
 		require.NoError(t, err)
 		require.Equal(t, answer.Text, storageData.ErrNoRecord.Error())
-		err = cleanDBandRedis(ctx)
+		err = cleanDBandRedis(ctx, log)
 		require.NoError(t, err)
+		log.Info("RemoveFromWhiteList_Failure done")
 	})
 }
 func TestIPIsInWL(t *testing.T) {
 	t.Run("IPIsInWhiteList_Success", func(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
 		defer cancel()
-		script := `INSERT INTO whitelist(IP, mask) VALUES ("192.168.64.0",24)`
+		script := `INSERT INTO whitelist(IP, mask) VALUES ('192.168.64.0',24)`
 		_, err := pgSQL_DB.ExecContext(ctx, script)
 		require.NoError(t, err)
-		script = `SELECT IP,mask FROM whitelist WHERE IP = "192.168.64.0" AND mask=24`
+		script = `SELECT IP,mask FROM whitelist WHERE IP = '192.168.64.0' AND mask=24`
 		row := pgSQL_DB.QueryRowContext(ctx, script)
 		var IP string
 		var mask int
@@ -237,8 +244,9 @@ func TestIPIsInWL(t *testing.T) {
 		err = json.Unmarshal(respBody, &answer)
 		require.NoError(t, err)
 		require.Equal(t, answer.Message.Text, "Yes")
-		err = cleanDBandRedis(ctx)
+		err = cleanDBandRedis(ctx, log)
 		require.NoError(t, err)
+		log.Info("IPIsInWhiteList_Success done")
 	})
 	t.Run("IPIsInWhiteList_Failure", func(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
@@ -258,18 +266,19 @@ func TestIPIsInWL(t *testing.T) {
 		err = json.Unmarshal(respBody, &answer)
 		require.NoError(t, err)
 		require.Equal(t, answer.Message.Text, "No")
-		err = cleanDBandRedis(ctx)
+		err = cleanDBandRedis(ctx, log)
 		require.NoError(t, err)
+		log.Info("IPIsInWhiteList_Failure done")
 	})
 }
 func TestIPGetAllInWL(t *testing.T) {
 	t.Run("IPGetAllInWhiteList_Success", func(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
 		defer cancel()
-		script := `INSERT INTO whitelist(IP,mask) VALUES ("192.168.64.0",24)`
+		script := `INSERT INTO whitelist(IP,mask) VALUES ('192.168.64.0',24)`
 		_, err := pgSQL_DB.ExecContext(ctx, script)
 		require.NoError(t, err)
-		script = `INSERT INTO whitelist(IP,mask) VALUES ("10.0.0.0",8)`
+		script = `INSERT INTO whitelist(IP,mask) VALUES ('10.0.0.0',8)`
 		_, err = pgSQL_DB.ExecContext(ctx, script)
 		require.NoError(t, err)
 		url := helpers.StringBuild("http://", config.GetServerURL(), "/whitelist/")
@@ -293,8 +302,9 @@ func TestIPGetAllInWL(t *testing.T) {
 		require.Equal(t, len(result), 2)
 		require.Equal(t, result[0], "192.168.64.0/24")
 		require.Equal(t, result[1], "10.0.0.0/8")
-		err = cleanDBandRedis(ctx)
+		err = cleanDBandRedis(ctx, log)
 		require.NoError(t, err)
+		log.Info("IPGetAllInWhiteList_Success done")
 	})
 }
 func TestAddToBL(t *testing.T) {
@@ -312,7 +322,7 @@ func TestAddToBL(t *testing.T) {
 		require.Equal(t, answer.Text, "Everything is OK")
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
 		defer cancel()
-		script := `SELECT IP,mask FROM blacklist WHERE IP = "192.168.64.0" AND mask=24`
+		script := `SELECT IP,mask FROM blacklist WHERE IP = '192.168.64.0' AND mask=24`
 		row := pgSQL_DB.QueryRowContext(ctx, script)
 		var IP string
 		var mask int
@@ -320,13 +330,14 @@ func TestAddToBL(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, IP, "192.168.64.0")
 		require.Equal(t, mask, 24)
-		err = cleanDBandRedis(ctx)
+		err = cleanDBandRedis(ctx, log)
 		require.NoError(t, err)
+		log.Info("AddToBlackList_Success done")
 	})
 	t.Run("AddToBlackList_Failure", func(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
 		defer cancel()
-		script := `INSERT INTO whitelist(IP,mask) VALUES ("192.168.64.0",24)`
+		script := `INSERT INTO whitelist(IP,mask) VALUES ('192.168.64.0',24)`
 		_, err := pgSQL_DB.ExecContext(ctx, script)
 		require.Error(t, err)
 		url := helpers.StringBuild("http://", config.GetServerURL(), "/blacklist/")
@@ -340,24 +351,25 @@ func TestAddToBL(t *testing.T) {
 		err = json.Unmarshal(respBody, &answer)
 		require.NoError(t, err)
 		require.Equal(t, answer.Text, "IP is already in whitelist")
-		script = `SELECT IP,mask FROM blacklist WHERE IP = "192.168.64.0" AND mask=24`
+		script = `SELECT IP,mask FROM blacklist WHERE IP = '192.168.64.0' AND mask=24`
 		row := pgSQL_DB.QueryRowContext(ctx, script)
 		var IP string
 		var mask int
 		err = row.Scan(&IP, &mask)
 		require.Truef(t, errors.Is(err, sql.ErrNoRows), "actual error %q", err)
-		err = cleanDBandRedis(ctx)
+		err = cleanDBandRedis(ctx, log)
 		require.NoError(t, err)
+		log.Info("AddToBlackList_Failure done")
 	})
 }
 func TestRemoveFromBL(t *testing.T) {
 	t.Run("RemoveFromBlackList_Success", func(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
 		defer cancel()
-		script := `INSERT INTO blacklist(IP,mask) VALUES ("192.168.64.0",24)`
+		script := `INSERT INTO blacklist(IP,mask) VALUES ('192.168.64.0',24)`
 		_, err := pgSQL_DB.ExecContext(ctx, script)
 		require.NoError(t, err)
-		script = `SELECT IP,mask FROM blacklist WHERE IP = "192.168.64.0" AND mask=24`
+		script = `SELECT IP,mask FROM blacklist WHERE IP = '192.168.64.0' AND mask=24`
 		row := pgSQL_DB.QueryRowContext(ctx, script)
 		var IP string
 		var mask int
@@ -380,12 +392,13 @@ func TestRemoveFromBL(t *testing.T) {
 		err = json.Unmarshal(respBody, &answer)
 		require.NoError(t, err)
 		require.Equal(t, answer.Text, "Everything is OK")
-		script = `SELECT IP,mask FROM blacklist WHERE IP = "192.168.64.0" AND mask=24`
+		script = `SELECT IP,mask FROM blacklist WHERE IP = '192.168.64.0' AND mask=24`
 		row = pgSQL_DB.QueryRowContext(ctx, script)
 		err = row.Scan(&IP, &mask)
 		require.Truef(t, errors.Is(err, sql.ErrNoRows), "actual error %q", err)
-		err = cleanDBandRedis(ctx)
+		err = cleanDBandRedis(ctx, log)
 		require.NoError(t, err)
+		log.Info("RemoveFromBlackList_Success done")
 	})
 	t.Run("RemoveFromBlackList_Failure", func(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
@@ -405,18 +418,19 @@ func TestRemoveFromBL(t *testing.T) {
 		err = json.Unmarshal(respBody, &answer)
 		require.NoError(t, err)
 		require.Equal(t, answer.Text, storageData.ErrNoRecord.Error())
-		err = cleanDBandRedis(ctx)
+		err = cleanDBandRedis(ctx, log)
 		require.NoError(t, err)
+		log.Info("RemoveFromBlackList_Failure done")
 	})
 }
 func TestIPIsInBL(t *testing.T) {
 	t.Run("IPIsInBlackList_Success", func(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
 		defer cancel()
-		script := `INSERT INTO blacklist(IP, mask) VALUES ("192.168.64.0",24)`
+		script := `INSERT INTO blacklist(IP, mask) VALUES ('192.168.64.0',24)`
 		_, err := pgSQL_DB.ExecContext(ctx, script)
 		require.NoError(t, err)
-		script = `SELECT IP,mask FROM blacklist WHERE IP = "192.168.64.0" AND mask=24`
+		script = `SELECT IP,mask FROM blacklist WHERE IP = '192.168.64.0' AND mask=24`
 		row := pgSQL_DB.QueryRowContext(ctx, script)
 		var IP string
 		var mask int
@@ -439,8 +453,9 @@ func TestIPIsInBL(t *testing.T) {
 		err = json.Unmarshal(respBody, &answer)
 		require.NoError(t, err)
 		require.Equal(t, answer.Message.Text, "Yes")
-		err = cleanDBandRedis(ctx)
+		err = cleanDBandRedis(ctx, log)
 		require.NoError(t, err)
+		log.Info("IPIsInBlackList_Success done")
 	})
 	t.Run("IPIsInBlackList_Failure", func(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
@@ -460,18 +475,19 @@ func TestIPIsInBL(t *testing.T) {
 		err = json.Unmarshal(respBody, &answer)
 		require.NoError(t, err)
 		require.Equal(t, answer.Message.Text, "No")
-		err = cleanDBandRedis(ctx)
+		err = cleanDBandRedis(ctx, log)
 		require.NoError(t, err)
+		log.Info("IPIsInBlackList_Failure done")
 	})
 }
 func TestIPGetAllInBL(t *testing.T) {
 	t.Run("IPGetAllInBlackList_Success", func(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
 		defer cancel()
-		script := `INSERT INTO blacklist(IP,mask) VALUES ("192.168.64.0",24)`
+		script := `INSERT INTO blacklist(IP,mask) VALUES ('192.168.64.0',24)`
 		_, err := pgSQL_DB.ExecContext(ctx, script)
 		require.NoError(t, err)
-		script = `INSERT INTO blacklist(IP,mask) VALUES ("10.0.0.0",8)`
+		script = `INSERT INTO blacklist(IP,mask) VALUES ('10.0.0.0',8)`
 		_, err = pgSQL_DB.ExecContext(ctx, script)
 		require.NoError(t, err)
 		url := helpers.StringBuild("http://", config.GetServerURL(), "/blacklist/")
@@ -495,8 +511,9 @@ func TestIPGetAllInBL(t *testing.T) {
 		require.Equal(t, len(result), 2)
 		require.Equal(t, result[0], "192.168.64.0/24")
 		require.Equal(t, result[1], "10.0.0.0/8")
-		err = cleanDBandRedis(ctx)
+		err = cleanDBandRedis(ctx, log)
 		require.NoError(t, err)
+		log.Info("IPGetAllInBlackList_Success done")
 	})
 }
 func TestClearBucketForLogin(t *testing.T) {
@@ -526,8 +543,9 @@ func TestClearBucketForLogin(t *testing.T) {
 		value, err = reddb.Get(ctx, "l_user").Result()
 		require.NoError(t, err)
 		require.Equal(t, value, "0")
-		err = cleanDBandRedis(ctx)
+		err = cleanDBandRedis(ctx, log)
 		require.NoError(t, err)
+		log.Info("ClearBucketForLogin_Success done")
 	})
 }
 func TestClearBucketForIP(t *testing.T) {
@@ -557,8 +575,9 @@ func TestClearBucketForIP(t *testing.T) {
 		value, err = reddb.Get(ctx, "ip_192.168.64.12").Result()
 		require.NoError(t, err)
 		require.Equal(t, value, "0")
-		err = cleanDBandRedis(ctx)
+		err = cleanDBandRedis(ctx, log)
 		require.NoError(t, err)
+		log.Info("ClearBucketForIP_Success done")
 	})
 }
 func TestAuthorizationRequest(t *testing.T) {
@@ -566,8 +585,12 @@ func TestAuthorizationRequest(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
 		defer cancel()
 		url := helpers.StringBuild("http://", config.GetServerURL(), "/request/")
-		jsonStr := []byte(`{"Login":"user","Password":"PassGood","IP":"192.168.64.12"}`)
-		req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+		jsonStr := []byte(`{
+			"Login":"user",
+			"Password":"PassGood",
+			"IP":"192.168.64.12"
+		}`)
+		req, err := http.NewRequest("GET", url, bytes.NewBuffer(jsonStr))
 		require.NoError(t, err)
 		req.Header.Set("Content-Type", "application/json")
 		client := &http.Client{}
@@ -590,8 +613,9 @@ func TestAuthorizationRequest(t *testing.T) {
 		value, err = reddb.Get(ctx, "ip_192.168.64.12").Result()
 		require.NoError(t, err)
 		require.Equal(t, value, "1")
-		err = cleanDBandRedis(ctx)
+		err = cleanDBandRedis(ctx, log)
 		require.NoError(t, err)
+		log.Info("AuthorizationRequest_Success done")
 	})
 }
 
@@ -641,24 +665,27 @@ func InitAndConnectRedis(ctx context.Context, logger storageData.Logger, config 
 		return reddb, nil
 	}
 }
-func cleanDBandRedis(ctx context.Context) error {
+func cleanDBandRedis(ctx context.Context, logger storageData.Logger) error {
 	reddb.FlushDB(ctx)
 	script := "TRUNCATE TABLE OTUSAntibf.whitelist"
 	_, err := pgSQL_DB.ExecContext(ctx, script)
 	if err != nil {
+		logger.Error("SQL DB truncate whitelist failed:" + err.Error())
 		return err
 	}
 	script = "TRUNCATE TABLE OTUSAntibf.blacklist"
 	_, err = pgSQL_DB.ExecContext(ctx, script)
 	if err != nil {
+		logger.Error("SQL DB truncate blacklist failed:" + err.Error())
 		return err
 	}
 	return err
 }
 
-func closeDBandRedis(ctx context.Context) error {
+func closeDBandRedis(ctx context.Context, logger storageData.Logger) error {
 	err := reddb.Close()
 	if err != nil {
+		logger.Error("Redis Close err:" + err.Error())
 		return err
 	}
 	err = pgSQL_DB.Close()
