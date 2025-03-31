@@ -68,22 +68,19 @@ func (storage *Storage) Close(ctx context.Context, logger storageData.Logger) er
 }
 
 func (storage *Storage) IPAddToList(ctx context.Context, listname string, logger storageData.Logger, ipData storageData.StorageIPData) (int, error) { //nolint:lll
-	script := "INSERT INTO " + listname + "(IP, mask) VALUES (?,?)"
-	result, err := storage.DB.ExecContext(ctx, script, ipData.IP, ipData.Mask)
+	script := "INSERT INTO " + listname + "(IP, mask) VALUES ($1,$2) RETURNING id"
+	var id int
+	err := storage.DB.QueryRowContext(ctx, script, ipData.IP, ipData.Mask).Scan(&id)
+	// result, err := storage.DB.ExecContext(ctx, script, ipData.IP, ipData.Mask)
 	if err != nil {
 		logger.Error("SQL IPAddToList script failed: " + err.Error() + ", SQL script: " + script)
 		return 0, err
 	}
-	id, err := result.LastInsertId()
-	if err != nil {
-		logger.Error("SQL IPAddToList LastInsertId failed: " + err.Error() + ", SQL script: " + script)
-		return 0, err
-	}
-	return int(id), nil
+	return id, nil
 }
 
 func (storage *Storage) IPRemoveFromList(ctx context.Context, listname string, logger storageData.Logger, ipData storageData.StorageIPData) error { //nolint:lll
-	script := "DELETE FROM " + listname + "WHERE IP = ? AND Mask = ?"
+	script := "DELETE FROM " + listname + " WHERE IP = $1 AND Mask = $2"
 	result, err := storage.DB.ExecContext(ctx, script, ipData.IP, ipData.Mask)
 	if err != nil {
 		logger.Error("SQL IPRemoveFromList script failed: " + err.Error() + ", SQL script: " + script)
@@ -102,7 +99,7 @@ func (storage *Storage) IPRemoveFromList(ctx context.Context, listname string, l
 }
 
 func (storage *Storage) IPIsInList(ctx context.Context, listname string, logger storageData.Logger, ipData storageData.StorageIPData) (bool, error) { //nolint:lll
-	script := "SELECT id, IP FROM " + listname + "WHERE IP = ? AND Mask = ?"
+	script := "SELECT id, IP FROM " + listname + " WHERE IP = $1 AND Mask = $2"
 	row := storage.DB.QueryRowContext(ctx, script, ipData.IP, ipData.Mask)
 	storageDataIP := &storageData.StorageIPData{}
 	err := row.Scan(&storageDataIP.ID, &storageDataIP.IP)

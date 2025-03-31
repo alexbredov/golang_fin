@@ -1,4 +1,4 @@
-package integrationtests
+package integration
 
 import (
 	"bytes"
@@ -207,7 +207,7 @@ func TestRemoveFromWL(t *testing.T) {
 		answer := outputJSON{}
 		err = json.Unmarshal(respBody, &answer)
 		require.NoError(t, err)
-		require.Equal(t, answer.Text, storageData.ErrNoRecord.Error())
+		require.Equal(t, answer.Text, "Internal error: "+storageData.ErrNoRecord.Error())
 		err = cleanDBandRedis(ctx, log)
 		require.NoError(t, err)
 		log.Info("RemoveFromWhiteList_Failure done")
@@ -416,7 +416,7 @@ func TestRemoveFromBL(t *testing.T) {
 		answer := outputJSON{}
 		err = json.Unmarshal(respBody, &answer)
 		require.NoError(t, err)
-		require.Equal(t, answer.Text, storageData.ErrNoRecord.Error())
+		require.Equal(t, answer.Text, "Internal error: "+storageData.ErrNoRecord.Error())
 		err = cleanDBandRedis(ctx, log)
 		require.NoError(t, err)
 		log.Info("RemoveFromBlackList_Failure done")
@@ -666,13 +666,13 @@ func InitAndConnectRedis(ctx context.Context, logger storageData.Logger, config 
 }
 func cleanDBandRedis(ctx context.Context, logger storageData.Logger) error {
 	reddb.FlushDB(ctx)
-	script := "TRUNCATE TABLE OTUSAntibf.whitelist"
+	script := `TRUNCATE TABLE whitelist`
 	_, err := pgSQL_DB.ExecContext(ctx, script)
 	if err != nil {
 		logger.Error("SQL DB truncate whitelist failed:" + err.Error())
 		return err
 	}
-	script = "TRUNCATE TABLE OTUSAntibf.blacklist"
+	script = `TRUNCATE TABLE blacklist`
 	_, err = pgSQL_DB.ExecContext(ctx, script)
 	if err != nil {
 		logger.Error("SQL DB truncate blacklist failed:" + err.Error())
