@@ -1,3 +1,4 @@
+//nolint:gosec,goconst,noctx,nolintlint
 package integration
 
 import (
