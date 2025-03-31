@@ -69,7 +69,7 @@ func main() {
 		select {
 		case <-ctx.Done():
 			log.Info("antibf-cli is shutting down")
-			os.Exit(1)
+			os.Exit(1) //nolint:gocritic
 		default:
 			inpData.scanner.Scan()
 			rawCommand := inpData.scanner.Text()

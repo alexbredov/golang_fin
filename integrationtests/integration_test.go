@@ -11,7 +11,7 @@ import (
 	"github.com/alexbredov/golang_fin/helpers"
 	"github.com/alexbredov/golang_fin/internal/logger"
 	storageData "github.com/alexbredov/golang_fin/internal/storage/storageData"
-	_ "github.com/jackc/pgx/stdlib"
+	_ "github.com/jackc/pgx/stdlib" // db driver
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/require"
 	"io"
@@ -25,7 +25,7 @@ import (
 
 var (
 	configFilePath string
-	pgSQL_DB       *sql.DB
+	pgSQLDB        *sql.DB
 	reddb          *redis.Client
 	config         Config
 	log            *logger.LogWrapper
@@ -58,7 +58,7 @@ func TestMain(m *testing.M) {
 	config = NewConfig()
 	if err := config.Init(configFilePath); err != nil {
 		fmt.Println(err)
-		os.Exit(1)
+		os.Exit(1) //nolint:gocritic
 	}
 
 	var err error
@@ -68,7 +68,7 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 
-	pgSQL_DB, err = InitAndConnectDB(ctx, log, &config)
+	pgSQLDB, err = InitAndConnectDB(ctx, log, &config)
 	if err != nil {
 		log.Error("PGSQL InitAndConnectDB err: " + err.Error())
 		os.Exit(1)
@@ -97,7 +97,7 @@ func TestMain(m *testing.M) {
 	os.Exit(exitCode)
 }
 
-func TestAddToWL(t *testing.T) {
+func TestAddToWL(t *testing.T) { //nolint:dupl
 	t.Run("AddToWhiteList_Success", func(t *testing.T) {
 		url := helpers.StringBuild("http://", config.GetServerURL(), "/whitelist/")
 		jsonStr := []byte(`{"IP":"192.168.64.0","Mask":24}`)
@@ -113,7 +113,7 @@ func TestAddToWL(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
 		defer cancel()
 		script := `SELECT IP,mask FROM whitelist WHERE IP = '192.168.64.0' AND mask=24`
-		row := pgSQL_DB.QueryRowContext(ctx, script)
+		row := pgSQLDB.QueryRowContext(ctx, script)
 		var IP string
 		var mask int
 		err = row.Scan(&IP, &mask)
@@ -128,7 +128,7 @@ func TestAddToWL(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
 		defer cancel()
 		script := `INSERT INTO blacklist(IP,mask) VALUES ('192.168.64.0',24)`
-		_, err := pgSQL_DB.ExecContext(ctx, script)
+		_, err := pgSQLDB.ExecContext(ctx, script)
 		require.NoError(t, err)
 		url := helpers.StringBuild("http://", config.GetServerURL(), "/whitelist/")
 		jsonStr := []byte(`{"IP":"192.168.64.0","Mask":24}`)
@@ -142,7 +142,7 @@ func TestAddToWL(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, answer.Text, "Internal error: "+"IP is already in blacklist")
 		script = `SELECT IP,mask FROM whitelist WHERE IP = '192.168.64.0' AND mask=24`
-		row := pgSQL_DB.QueryRowContext(ctx, script)
+		row := pgSQLDB.QueryRowContext(ctx, script)
 		var IP string
 		var mask int
 		err = row.Scan(&IP, &mask)
@@ -157,10 +157,10 @@ func TestRemoveFromWL(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
 		defer cancel()
 		script := `INSERT INTO whitelist(IP,mask) VALUES ('192.168.64.0',24)`
-		_, err := pgSQL_DB.ExecContext(ctx, script)
+		_, err := pgSQLDB.ExecContext(ctx, script)
 		require.NoError(t, err)
 		script = `SELECT IP,mask FROM whitelist WHERE IP = '192.168.64.0' AND mask=24`
-		row := pgSQL_DB.QueryRowContext(ctx, script)
+		row := pgSQLDB.QueryRowContext(ctx, script)
 		var IP string
 		var mask int
 		err = row.Scan(&IP, &mask)
@@ -183,7 +183,7 @@ func TestRemoveFromWL(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, answer.Text, "Everything is OK")
 		script = `SELECT IP,mask FROM whitelist WHERE IP = '192.168.64.0' AND mask=24`
-		row = pgSQL_DB.QueryRowContext(ctx, script)
+		row = pgSQLDB.QueryRowContext(ctx, script)
 		err = row.Scan(&IP, &mask)
 		require.Truef(t, errors.Is(err, sql.ErrNoRows), "actual error %q", err)
 		err = cleanDBandRedis(ctx, log)
@@ -218,10 +218,10 @@ func TestIPIsInWL(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
 		defer cancel()
 		script := `INSERT INTO whitelist(IP, mask) VALUES ('192.168.64.0',24)`
-		_, err := pgSQL_DB.ExecContext(ctx, script)
+		_, err := pgSQLDB.ExecContext(ctx, script)
 		require.NoError(t, err)
 		script = `SELECT IP,mask FROM whitelist WHERE IP = '192.168.64.0' AND mask=24`
-		row := pgSQL_DB.QueryRowContext(ctx, script)
+		row := pgSQLDB.QueryRowContext(ctx, script)
 		var IP string
 		var mask int
 		err = row.Scan(&IP, &mask)
@@ -275,10 +275,10 @@ func TestIPGetAllInWL(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
 		defer cancel()
 		script := `INSERT INTO whitelist(IP,mask) VALUES ('192.168.64.0',24)`
-		_, err := pgSQL_DB.ExecContext(ctx, script)
+		_, err := pgSQLDB.ExecContext(ctx, script)
 		require.NoError(t, err)
 		script = `INSERT INTO whitelist(IP,mask) VALUES ('10.0.0.0',8)`
-		_, err = pgSQL_DB.ExecContext(ctx, script)
+		_, err = pgSQLDB.ExecContext(ctx, script)
 		require.NoError(t, err)
 		url := helpers.StringBuild("http://", config.GetServerURL(), "/whitelist/")
 		jsonStr := []byte(`{"IP":"ALL","Mask":0}`)
@@ -306,7 +306,7 @@ func TestIPGetAllInWL(t *testing.T) {
 		log.Info("IPGetAllInWhiteList_Success done")
 	})
 }
-func TestAddToBL(t *testing.T) {
+func TestAddToBL(t *testing.T) { //nolint:dupl
 	t.Run("AddToBlackList_Success", func(t *testing.T) {
 		url := helpers.StringBuild("http://", config.GetServerURL(), "/blacklist/")
 		jsonStr := []byte(`{"IP":"192.168.64.0","Mask":24}`)
@@ -322,7 +322,7 @@ func TestAddToBL(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
 		defer cancel()
 		script := `SELECT IP,mask FROM blacklist WHERE IP = '192.168.64.0' AND mask=24`
-		row := pgSQL_DB.QueryRowContext(ctx, script)
+		row := pgSQLDB.QueryRowContext(ctx, script)
 		var IP string
 		var mask int
 		err = row.Scan(&IP, &mask)
@@ -337,7 +337,7 @@ func TestAddToBL(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
 		defer cancel()
 		script := `INSERT INTO whitelist(IP,mask) VALUES ('192.168.64.0',24)`
-		_, err := pgSQL_DB.ExecContext(ctx, script)
+		_, err := pgSQLDB.ExecContext(ctx, script)
 		require.NoError(t, err)
 		url := helpers.StringBuild("http://", config.GetServerURL(), "/blacklist/")
 		jsonStr := []byte(`{"IP":"192.168.64.0","Mask":24}`)
@@ -351,7 +351,7 @@ func TestAddToBL(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, answer.Text, "Internal error: "+"IP is already in whitelist")
 		script = `SELECT IP,mask FROM blacklist WHERE IP = '192.168.64.0' AND mask=24`
-		row := pgSQL_DB.QueryRowContext(ctx, script)
+		row := pgSQLDB.QueryRowContext(ctx, script)
 		var IP string
 		var mask int
 		err = row.Scan(&IP, &mask)
@@ -366,10 +366,10 @@ func TestRemoveFromBL(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
 		defer cancel()
 		script := `INSERT INTO blacklist(IP,mask) VALUES ('192.168.64.0',24)`
-		_, err := pgSQL_DB.ExecContext(ctx, script)
+		_, err := pgSQLDB.ExecContext(ctx, script)
 		require.NoError(t, err)
 		script = `SELECT IP,mask FROM blacklist WHERE IP = '192.168.64.0' AND mask=24`
-		row := pgSQL_DB.QueryRowContext(ctx, script)
+		row := pgSQLDB.QueryRowContext(ctx, script)
 		var IP string
 		var mask int
 		err = row.Scan(&IP, &mask)
@@ -392,7 +392,7 @@ func TestRemoveFromBL(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, answer.Text, "Everything is OK")
 		script = `SELECT IP,mask FROM blacklist WHERE IP = '192.168.64.0' AND mask=24`
-		row = pgSQL_DB.QueryRowContext(ctx, script)
+		row = pgSQLDB.QueryRowContext(ctx, script)
 		err = row.Scan(&IP, &mask)
 		require.Truef(t, errors.Is(err, sql.ErrNoRows), "actual error %q", err)
 		err = cleanDBandRedis(ctx, log)
@@ -427,10 +427,10 @@ func TestIPIsInBL(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
 		defer cancel()
 		script := `INSERT INTO blacklist(IP, mask) VALUES ('192.168.64.0',24)`
-		_, err := pgSQL_DB.ExecContext(ctx, script)
+		_, err := pgSQLDB.ExecContext(ctx, script)
 		require.NoError(t, err)
 		script = `SELECT IP,mask FROM blacklist WHERE IP = '192.168.64.0' AND mask=24`
-		row := pgSQL_DB.QueryRowContext(ctx, script)
+		row := pgSQLDB.QueryRowContext(ctx, script)
 		var IP string
 		var mask int
 		err = row.Scan(&IP, &mask)
@@ -484,10 +484,10 @@ func TestIPGetAllInBL(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
 		defer cancel()
 		script := `INSERT INTO blacklist(IP,mask) VALUES ('192.168.64.0',24)`
-		_, err := pgSQL_DB.ExecContext(ctx, script)
+		_, err := pgSQLDB.ExecContext(ctx, script)
 		require.NoError(t, err)
 		script = `INSERT INTO blacklist(IP,mask) VALUES ('10.0.0.0',8)`
-		_, err = pgSQL_DB.ExecContext(ctx, script)
+		_, err = pgSQLDB.ExecContext(ctx, script)
 		require.NoError(t, err)
 		url := helpers.StringBuild("http://", config.GetServerURL(), "/blacklist/")
 		jsonStr := []byte(`{"IP":"ALL","Mask":0}`)
@@ -629,23 +629,23 @@ func InitAndConnectDB(ctx context.Context, logger storageData.Logger, config sto
 		var err error
 		dsn := helpers.StringBuild("postgres://", config.GetDBUser(), ":", config.GetDBPassword(), "@",
 			config.GetDBAddress(), ":", config.GetDBPort(), "/", config.GetDBName(), "?sslmode=disable")
-		pgSQL_DBint, err := sql.Open("pgx", dsn)
+		pgSQLDBint, err := sql.Open("pgx", dsn)
 		if err != nil {
 			logger.Error("SQL Open connection failed:" + err.Error())
 			return nil, err
 		}
-		pgSQL_DBint.SetConnMaxLifetime(config.GetDBMaxConnectionLifetime())
-		pgSQL_DBint.SetMaxOpenConns(config.GetDBMaxOpenConnections())
-		pgSQL_DBint.SetMaxIdleConns(config.GetDBMaxIdleConnections())
-		err = pgSQL_DBint.PingContext(ctx)
+		pgSQLDBint.SetConnMaxLifetime(config.GetDBMaxConnectionLifetime())
+		pgSQLDBint.SetMaxOpenConns(config.GetDBMaxOpenConnections())
+		pgSQLDBint.SetMaxIdleConns(config.GetDBMaxIdleConnections())
+		err = pgSQLDBint.PingContext(ctx)
 		if err != nil {
 			logger.Error("SQL DB ping failed:" + err.Error())
 			return nil, err
 		}
-		return pgSQL_DBint, nil
+		return pgSQLDBint, nil
 	}
 }
-func InitAndConnectRedis(ctx context.Context, logger storageData.Logger, config storageData.Config) (*redis.Client, error) {
+func InitAndConnectRedis(ctx context.Context, logger storageData.Logger, config storageData.Config) (*redis.Client, error) { //nolint:lll
 	select {
 	case <-ctx.Done():
 		return nil, storageData.ErrStorageTimeout
@@ -669,13 +669,13 @@ func InitAndConnectRedis(ctx context.Context, logger storageData.Logger, config 
 func cleanDBandRedis(ctx context.Context, logger storageData.Logger) error {
 	reddb.FlushDB(ctx)
 	script := `TRUNCATE TABLE whitelist`
-	_, err := pgSQL_DB.ExecContext(ctx, script)
+	_, err := pgSQLDB.ExecContext(ctx, script)
 	if err != nil {
 		logger.Error("SQL DB truncate whitelist failed:" + err.Error())
 		return err
 	}
 	script = `TRUNCATE TABLE blacklist`
-	_, err = pgSQL_DB.ExecContext(ctx, script)
+	_, err = pgSQLDB.ExecContext(ctx, script)
 	if err != nil {
 		logger.Error("SQL DB truncate blacklist failed:" + err.Error())
 		return err
@@ -683,12 +683,12 @@ func cleanDBandRedis(ctx context.Context, logger storageData.Logger) error {
 	return err
 }
 
-func closeDBandRedis(ctx context.Context, logger storageData.Logger) error {
+func closeDBandRedis(_ context.Context, logger storageData.Logger) error {
 	err := reddb.Close()
 	if err != nil {
 		logger.Error("Redis Close err:" + err.Error())
 		return err
 	}
-	err = pgSQL_DB.Close()
+	err = pgSQLDB.Close()
 	return err
 }

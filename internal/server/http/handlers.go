@@ -171,7 +171,7 @@ func (server *Server) RESTBlackList(w http.ResponseWriter, r *http.Request) {
 	server.listRest(w, r, "blacklist")
 }
 
-func (server *Server) listRest(w http.ResponseWriter, r *http.Request, listname string) {
+func (server *Server) listRest(w http.ResponseWriter, r *http.Request, listname string) { //nolint:funlen,gocognit
 	defer r.Body.Close()
 	ctx, cancel := context.WithTimeout(r.Context(), server.Config.GetDBTimeout())
 	defer cancel()

@@ -4,14 +4,22 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-
 	"github.com/alexbredov/golang_fin/helpers"
 	storageData "github.com/alexbredov/golang_fin/internal/storage/storageData"
-	_ "github.com/jackc/pgx/stdlib"
+	_ "github.com/jackc/pgx/stdlib" // db driver
 )
 
 type Storage struct {
 	DB *sql.DB
+}
+
+var allowedTables = map[string]bool{
+	"whitelist": true,
+	"blacklist": true,
+}
+
+func isValidListName(listname string) bool {
+	return allowedTables[listname]
 }
 
 func New() *Storage {
@@ -68,6 +76,11 @@ func (storage *Storage) Close(ctx context.Context, logger storageData.Logger) er
 }
 
 func (storage *Storage) IPAddToList(ctx context.Context, listname string, logger storageData.Logger, ipData storageData.StorageIPData) (int, error) { //nolint:lll
+	if !isValidListName(listname) {
+		logger.Error("List name is invalid: " + listname)
+		err := errors.New("List name is invalid: " + listname)
+		return 0, err
+	}
 	script := "INSERT INTO " + listname + "(IP, mask) VALUES ($1,$2) RETURNING id"
 	var id int
 	err := storage.DB.QueryRowContext(ctx, script, ipData.IP, ipData.Mask).Scan(&id)
@@ -80,7 +93,12 @@ func (storage *Storage) IPAddToList(ctx context.Context, listname string, logger
 }
 
 func (storage *Storage) IPRemoveFromList(ctx context.Context, listname string, logger storageData.Logger, ipData storageData.StorageIPData) error { //nolint:lll
-	script := "DELETE FROM " + listname + " WHERE IP = $1 AND Mask = $2"
+	if !isValidListName(listname) {
+		logger.Error("List name is invalid: " + listname)
+		err := errors.New("List name is invalid: " + listname)
+		return err
+	}
+	script := "DELETE FROM " + listname + " WHERE IP = $1 AND Mask = $2" //nolint:gosec
 	result, err := storage.DB.ExecContext(ctx, script, ipData.IP, ipData.Mask)
 	if err != nil {
 		logger.Error("SQL IPRemoveFromList script failed: " + err.Error() + ", SQL script: " + script)
@@ -99,7 +117,12 @@ func (storage *Storage) IPRemoveFromList(ctx context.Context, listname string, l
 }
 
 func (storage *Storage) IPIsInList(ctx context.Context, listname string, logger storageData.Logger, ipData storageData.StorageIPData) (bool, error) { //nolint:lll
-	script := "SELECT id, IP FROM " + listname + " WHERE IP = $1 AND Mask = $2"
+	if !isValidListName(listname) {
+		logger.Error("List name is invalid: " + listname)
+		err := errors.New("List name is invalid: " + listname)
+		return false, err
+	}
+	script := "SELECT id, IP FROM " + listname + " WHERE IP = $1 AND Mask = $2" //nolint:gosec
 	row := storage.DB.QueryRowContext(ctx, script, ipData.IP, ipData.Mask)
 	storageDataIP := &storageData.StorageIPData{}
 	err := row.Scan(&storageDataIP.ID, &storageDataIP.IP)
@@ -115,7 +138,12 @@ func (storage *Storage) IPIsInList(ctx context.Context, listname string, logger 
 
 func (storage *Storage) IPGetAllFromList(ctx context.Context, listname string, logger storageData.Logger) ([]storageData.StorageIPData, error) { //nolint:lll
 	resultIP := make([]storageData.StorageIPData, 0)
-	script := "SELECT id, mask, IP FROM " + listname
+	if !isValidListName(listname) {
+		logger.Error("List name is invalid: " + listname)
+		err := errors.New("List name is invalid: " + listname)
+		return nil, err
+	}
+	script := "SELECT id, mask, IP FROM " + listname //nolint:gosec
 	rows, err := storage.DB.QueryContext(ctx, script)
 	if err != nil {
 		logger.Error("SQL IPGetAllFromList query failed: " + err.Error() + ", SQL script: " + script)

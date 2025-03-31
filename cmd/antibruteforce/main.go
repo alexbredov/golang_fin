@@ -13,9 +13,10 @@ import (
 	httpinternal "github.com/alexbredov/golang_fin/internal/server/http"
 	RedisStorage "github.com/alexbredov/golang_fin/internal/storage/redis"
 	SQLstorage "github.com/alexbredov/golang_fin/internal/storage/sqldb"
-	_ "github.com/jackc/pgx/stdlib"
+	_ "github.com/jackc/pgx/stdlib" // db driver
 )
 
+//nolint:gofmt,gofumt,gci,gosec,nolintlint
 var configFilePath string
 
 func init() {
@@ -80,6 +81,6 @@ func main() {
 	if err := server.Start(ctx); err != nil {
 		log.Error("Failed to start http server:" + err.Error())
 		cancel()
-		os.Exit(1)
+		os.Exit(1) //nolint:gocritic
 	}
 }
