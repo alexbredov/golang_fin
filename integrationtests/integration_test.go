@@ -55,7 +55,6 @@ func TestMain(m *testing.M) {
 	flag.Parse()
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 	defer cancel()
-	log.Info("Creating config")
 	config = NewConfig()
 	if err := config.Init(configFilePath); err != nil {
 		fmt.Println(err)
