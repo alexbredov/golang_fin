@@ -129,7 +129,7 @@ func TestAddToWL(t *testing.T) {
 		defer cancel()
 		script := `INSERT INTO blacklist(IP,mask) VALUES ('192.168.64.0',24)`
 		_, err := pgSQL_DB.ExecContext(ctx, script)
-		require.Error(t, err)
+		require.NoError(t, err)
 		url := helpers.StringBuild("http://", config.GetServerURL(), "/whitelist/")
 		jsonStr := []byte(`{"IP":"192.168.64.0","Mask":24}`)
 		resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonStr))
@@ -140,7 +140,7 @@ func TestAddToWL(t *testing.T) {
 		answer := outputJSON{}
 		err = json.Unmarshal(respBody, &answer)
 		require.NoError(t, err)
-		require.Equal(t, answer.Text, "IP is already in blacklist")
+		require.Equal(t, answer.Text, "Internal error: "+"IP is already in blacklist")
 		script = `SELECT IP,mask FROM whitelist WHERE IP = '192.168.64.0' AND mask=24`
 		row := pgSQL_DB.QueryRowContext(ctx, script)
 		var IP string
@@ -338,7 +338,7 @@ func TestAddToBL(t *testing.T) {
 		defer cancel()
 		script := `INSERT INTO whitelist(IP,mask) VALUES ('192.168.64.0',24)`
 		_, err := pgSQL_DB.ExecContext(ctx, script)
-		require.Error(t, err)
+		require.NoError(t, err)
 		url := helpers.StringBuild("http://", config.GetServerURL(), "/blacklist/")
 		jsonStr := []byte(`{"IP":"192.168.64.0","Mask":24}`)
 		resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonStr))
@@ -349,7 +349,7 @@ func TestAddToBL(t *testing.T) {
 		answer := outputJSON{}
 		err = json.Unmarshal(respBody, &answer)
 		require.NoError(t, err)
-		require.Equal(t, answer.Text, "IP is already in whitelist")
+		require.Equal(t, answer.Text, "Internal error: "+"IP is already in whitelist")
 		script = `SELECT IP,mask FROM blacklist WHERE IP = '192.168.64.0' AND mask=24`
 		row := pgSQL_DB.QueryRowContext(ctx, script)
 		var IP string
@@ -524,7 +524,7 @@ func TestClearBucketForLogin(t *testing.T) {
 		value, err := reddb.Get(ctx, "l_user").Result()
 		require.NoError(t, err)
 		require.Equal(t, value, "10")
-		url := helpers.StringBuild("http://", config.GetServerURL(), "/clearbucketforlogin/")
+		url := helpers.StringBuild("http://", config.GetServerURL(), "/clearLogin/")
 		jsonStr := []byte(`{"Tag":"user"}`)
 		req, err := http.NewRequest("DELETE", url, bytes.NewBuffer(jsonStr))
 		require.NoError(t, err)
@@ -535,6 +535,7 @@ func TestClearBucketForLogin(t *testing.T) {
 		defer resp.Body.Close()
 		respBody, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
+		log.Info("Response from ClearBucketForLogin" + string(respBody))
 		answer := outputJSON{}
 		err = json.Unmarshal(respBody, &answer)
 		require.NoError(t, err)
@@ -551,12 +552,12 @@ func TestClearBucketForIP(t *testing.T) {
 	t.Run("ClearBucketForIP_Success", func(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
 		defer cancel()
-		err := reddb.Set(ctx, "ip_192.168.64.12", "100", 0).Err()
+		err := reddb.Set(ctx, "i_192.168.64.12", "100", 0).Err()
 		require.NoError(t, err)
-		value, err := reddb.Get(ctx, "ip_192.168.64.12").Result()
+		value, err := reddb.Get(ctx, "i_192.168.64.12").Result()
 		require.NoError(t, err)
 		require.Equal(t, value, "100")
-		url := helpers.StringBuild("http://", config.GetServerURL(), "/clearbucketforip/")
+		url := helpers.StringBuild("http://", config.GetServerURL(), "/clearIP/")
 		jsonStr := []byte(`{"Tag":"192.168.64.12"}`)
 		req, err := http.NewRequest("DELETE", url, bytes.NewBuffer(jsonStr))
 		require.NoError(t, err)
@@ -566,12 +567,13 @@ func TestClearBucketForIP(t *testing.T) {
 		require.NoError(t, err)
 		defer resp.Body.Close()
 		respBody, err := io.ReadAll(resp.Body)
+		log.Info("Response from ClearBucketForIP" + string(respBody))
 		require.NoError(t, err)
 		answer := outputJSON{}
 		err = json.Unmarshal(respBody, &answer)
 		require.NoError(t, err)
 		require.Equal(t, answer.Text, "Everything is OK")
-		value, err = reddb.Get(ctx, "ip_192.168.64.12").Result()
+		value, err = reddb.Get(ctx, "i_192.168.64.12").Result()
 		require.NoError(t, err)
 		require.Equal(t, value, "0")
 		err = cleanDBandRedis(ctx, log)
@@ -609,7 +611,7 @@ func TestAuthorizationRequest(t *testing.T) {
 		value, err = reddb.Get(ctx, "p_PassGood").Result()
 		require.NoError(t, err)
 		require.Equal(t, value, "1")
-		value, err = reddb.Get(ctx, "ip_192.168.64.12").Result()
+		value, err = reddb.Get(ctx, "i_192.168.64.12").Result()
 		require.NoError(t, err)
 		require.Equal(t, value, "1")
 		err = cleanDBandRedis(ctx, log)
