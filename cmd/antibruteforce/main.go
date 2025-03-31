@@ -16,7 +16,7 @@ import (
 	_ "github.com/jackc/pgx/stdlib" // db driver
 )
 
-//nolint:gofmt,gofumt,gci,gosec,nolintlint
+//nolint:gofmt,gci,gosec,nolintlint
 var configFilePath string
 
 func init() {

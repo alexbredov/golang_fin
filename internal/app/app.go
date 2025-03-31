@@ -3,12 +3,12 @@ package app
 import (
 	"context"
 	"errors"
-	"github.com/alexbredov/golang_fin/helpers"
-	storageData "github.com/alexbredov/golang_fin/internal/storage/storageData"
 	"net"
 	"strconv"
 	"time"
 
+	"github.com/alexbredov/golang_fin/helpers"
+	storageData "github.com/alexbredov/golang_fin/internal/storage/storageData"
 	"go.uber.org/zap"
 )
 
@@ -152,6 +152,7 @@ func (a *App) ClearBucketForLogin(ctx context.Context, login string) error {
 	a.logger.Info("Bucket cleared for login " + login)
 	return nil
 }
+
 func (a *App) ClearBucketForIP(ctx context.Context, ipData string) error {
 	err := a.bucketStorage.SetBucketValue(ctx, a.logger, "i_"+ipData, 0)
 	if err != nil {
@@ -162,12 +163,15 @@ func (a *App) ClearBucketForIP(ctx context.Context, ipData string) error {
 	a.logger.Info("Bucket cleared for ip " + ipData)
 	return nil
 }
+
 func (a *App) InitStorage(ctx context.Context, config storageData.Config) error {
 	return a.storage.Init(ctx, a.logger, config)
 }
+
 func (a *App) CloseStorage(ctx context.Context) error {
 	return a.storage.Close(ctx, a.logger)
 }
+
 func (a *App) IPAddToList(ctx context.Context, listname string, ipData storageData.StorageIPData) (int, error) {
 	err := SimpleIPDataValidate(ipData, false)
 	if err != nil {
@@ -210,6 +214,7 @@ func (a *App) IPAddToList(ctx context.Context, listname string, ipData storageDa
 	a.logger.Info(message)
 	return id, nil
 }
+
 func (a *App) IPRemoveFromList(ctx context.Context, listname string, ipData storageData.StorageIPData) error {
 	err := checkListName(listname)
 	if err != nil {
@@ -234,6 +239,7 @@ func (a *App) IPRemoveFromList(ctx context.Context, listname string, ipData stor
 	a.logger.Info(message)
 	return nil
 }
+
 func (a *App) IPIsInList(ctx context.Context, listname string, ipData storageData.StorageIPData) (bool, error) {
 	err := checkListName(listname)
 	if err != nil {
@@ -255,6 +261,7 @@ func (a *App) IPIsInList(ctx context.Context, listname string, ipData storageDat
 	}
 	return ok, err
 }
+
 func (a *App) IPGetAllFromList(ctx context.Context, listname string) ([]storageData.StorageIPData, error) {
 	err := checkListName(listname)
 	if err != nil {
@@ -270,6 +277,7 @@ func (a *App) IPGetAllFromList(ctx context.Context, listname string) ([]storageD
 	}
 	return list, err
 }
+
 func (a *App) IPIsInSubnetCheck(ctx context.Context, listname string, ip string) (bool, error) {
 	err := checkListName(listname)
 	if err != nil {
@@ -294,6 +302,7 @@ func (a *App) IPIsInSubnetCheck(ctx context.Context, listname string, ip string)
 	}
 	return false, nil
 }
+
 func checkListName(listname string) error {
 	if listname != storageData.WhiteListName && listname != storageData.BlackListName {
 		return storageData.ErrBadListType

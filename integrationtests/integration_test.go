@@ -8,12 +8,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/alexbredov/golang_fin/helpers"
-	"github.com/alexbredov/golang_fin/internal/logger"
-	storageData "github.com/alexbredov/golang_fin/internal/storage/storageData"
-	_ "github.com/jackc/pgx/stdlib" // db driver
-	"github.com/redis/go-redis/v9"
-	"github.com/stretchr/testify/require"
 	"io"
 	"net/http"
 	"os"
@@ -21,6 +15,13 @@ import (
 	"strconv"
 	"syscall"
 	"testing"
+
+	"github.com/alexbredov/golang_fin/helpers"
+	"github.com/alexbredov/golang_fin/internal/logger"
+	storageData "github.com/alexbredov/golang_fin/internal/storage/storageData"
+	_ "github.com/jackc/pgx/stdlib" // db driver
+	"github.com/redis/go-redis/v9"
+	"github.com/stretchr/testify/require"
 )
 
 var (
@@ -152,6 +153,7 @@ func TestAddToWL(t *testing.T) { //nolint:dupl
 		log.Info("AddToWhiteList_Failure done")
 	})
 }
+
 func TestRemoveFromWL(t *testing.T) {
 	t.Run("RemoveFromWhiteList_Success", func(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
@@ -213,6 +215,7 @@ func TestRemoveFromWL(t *testing.T) {
 		log.Info("RemoveFromWhiteList_Failure done")
 	})
 }
+
 func TestIPIsInWL(t *testing.T) {
 	t.Run("IPIsInWhiteList_Success", func(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
@@ -270,6 +273,7 @@ func TestIPIsInWL(t *testing.T) {
 		log.Info("IPIsInWhiteList_Failure done")
 	})
 }
+
 func TestIPGetAllInWL(t *testing.T) {
 	t.Run("IPGetAllInWhiteList_Success", func(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
@@ -306,6 +310,7 @@ func TestIPGetAllInWL(t *testing.T) {
 		log.Info("IPGetAllInWhiteList_Success done")
 	})
 }
+
 func TestAddToBL(t *testing.T) { //nolint:dupl
 	t.Run("AddToBlackList_Success", func(t *testing.T) {
 		url := helpers.StringBuild("http://", config.GetServerURL(), "/blacklist/")
@@ -361,6 +366,7 @@ func TestAddToBL(t *testing.T) { //nolint:dupl
 		log.Info("AddToBlackList_Failure done")
 	})
 }
+
 func TestRemoveFromBL(t *testing.T) {
 	t.Run("RemoveFromBlackList_Success", func(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
@@ -422,6 +428,7 @@ func TestRemoveFromBL(t *testing.T) {
 		log.Info("RemoveFromBlackList_Failure done")
 	})
 }
+
 func TestIPIsInBL(t *testing.T) {
 	t.Run("IPIsInBlackList_Success", func(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
@@ -479,6 +486,7 @@ func TestIPIsInBL(t *testing.T) {
 		log.Info("IPIsInBlackList_Failure done")
 	})
 }
+
 func TestIPGetAllInBL(t *testing.T) {
 	t.Run("IPGetAllInBlackList_Success", func(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
@@ -515,6 +523,7 @@ func TestIPGetAllInBL(t *testing.T) {
 		log.Info("IPGetAllInBlackList_Success done")
 	})
 }
+
 func TestClearBucketForLogin(t *testing.T) {
 	t.Run("ClearBucketForLogin_Success", func(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
@@ -548,6 +557,7 @@ func TestClearBucketForLogin(t *testing.T) {
 		log.Info("ClearBucketForLogin_Success done")
 	})
 }
+
 func TestClearBucketForIP(t *testing.T) {
 	t.Run("ClearBucketForIP_Success", func(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
@@ -581,6 +591,7 @@ func TestClearBucketForIP(t *testing.T) {
 		log.Info("ClearBucketForIP_Success done")
 	})
 }
+
 func TestAuthorizationRequest(t *testing.T) {
 	t.Run("AuthorizationRequest_Success", func(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeout())
@@ -645,6 +656,7 @@ func InitAndConnectDB(ctx context.Context, logger storageData.Logger, config sto
 		return pgSQLDBint, nil
 	}
 }
+
 func InitAndConnectRedis(ctx context.Context, logger storageData.Logger, config storageData.Config) (*redis.Client, error) { //nolint:lll
 	select {
 	case <-ctx.Done():
@@ -666,6 +678,7 @@ func InitAndConnectRedis(ctx context.Context, logger storageData.Logger, config 
 		return reddb, nil
 	}
 }
+
 func cleanDBandRedis(ctx context.Context, logger storageData.Logger) error {
 	reddb.FlushDB(ctx)
 	script := `TRUNCATE TABLE whitelist`
