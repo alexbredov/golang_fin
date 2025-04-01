@@ -366,9 +366,9 @@ func (comcont *CommandController) clearBucketByTag(arg []string, typeClear strin
 	}
 	switch typeClear {
 	case "login":
-		urlByType = "/clearbucketforlogin/"
+		urlByType = "/clearLogin/"
 	case "ip":
-		urlByType = "/clearbucketforip/"
+		urlByType = "/clearIp/"
 	default:
 		errStr := "Error: " + ErrBadArgument.Error()
 		comcont.logger.Error(errStr)
