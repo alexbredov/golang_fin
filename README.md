@@ -1,3 +1,4 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/alexbredov/golang_fin)](https://goreportcard.com/report/github.com/alexbredov/golang_fin) 
 # ТЗ на разработку сервиса "Анти-брутфорс"
 
 ## Общее описание
